@@ -1,0 +1,97 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum HabitStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+model User {
+  id                  String             @id @default(cuid())
+  fullName            String
+  email               String             @unique
+  passwordHash        String
+  avatarUrl           String?
+  timezone            String             @default("UTC")
+  streakFreezeCredits Int                @default(2)
+  freezeCreditsResetAt DateTime          @default(now())
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  habits              Habit[]
+  refreshTokens       RefreshToken[]
+  completions         HabitCompletion[]
+  freezeUsages        StreakFreezeUsage[]
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Habit {
+  id              String            @id @default(cuid())
+  userId          String
+  name            String
+  icon            String            @default("✅")
+  reminderEnabled Boolean           @default(false)
+  reminderTime    String?
+  status          HabitStatus       @default(ACTIVE)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  completions     HabitCompletion[]
+  progress        HabitProgress?
+  freezeUsages    StreakFreezeUsage[]
+
+  @@index([userId, status])
+}
+
+model HabitCompletion {
+  id          String   @id @default(cuid())
+  userId      String
+  habitId     String
+  localDate   String
+  timezone    String
+  completedAt DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  habit       Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, localDate])
+  @@index([userId, localDate])
+}
+
+model HabitProgress {
+  habitId           String   @id
+  currentStreak     Int      @default(0)
+  bestStreak        Int      @default(0)
+  lastCompletedDate String?
+  updatedAt         DateTime @updatedAt
+  habit             Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+}
+
+model StreakFreezeUsage {
+  id              String   @id @default(cuid())
+  userId          String
+  habitId         String
+  missedLocalDate String
+  usedAt          DateTime @default(now())
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  habit           Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@index([userId, missedLocalDate])
+  @@index([habitId, missedLocalDate])
+}

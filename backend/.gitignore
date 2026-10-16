@@ -1,0 +1,21 @@
+# Backend (Express + Prisma)
+
+node_modules/
+dist/
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Prisma
+# (migrations are committed on purpose; only the local SQLite-style dev db would be ignored)
+prisma/*.db
+prisma/*.db-journal
+
+# Logs & caches
+*.log
+*.tsbuildinfo
+
+# WSL artifacts
+*Zone.Identifier*

@@ -1,0 +1,19 @@
+# Frontend (Vite + React)
+
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Logs & caches
+*.log
+*.tsbuildinfo
+.vite/
+
+# WSL artifacts
+*Zone.Identifier*
