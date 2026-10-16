@@ -2,6 +2,11 @@
 
 **Date:** 2026-10-16 · **Branch:** `polish/2026-10-16` · **Scope:** polish only, no new features.
 
+> **Update:** CI/CD and Docker were subsequently removed and the project was switched to a
+> **local-only** setup (branch `dev`; local Postgres via `scripts/local-db.sh`). The build,
+> lint, README and code-quality items below still apply; the CI/deployment items are no longer
+> present in the repo.
+
 ---
 
 ## 1. Before / after summary
@@ -14,7 +19,7 @@
 | Build | Frontend `tsc` **failed** (`StreakPage.tsx`: `boolean \| undefined`) | Both apps build cleanly |
 | Lint | 19 errors + 2 warnings | 0 problems |
 | Runtime pin | none | `engines.node` in both `package.json` |
-| CI | none | `.github/workflows/ci.yml` (lint + build both apps) |
+| CI | none | `.github/workflows/ci.yml` (lint + build both apps) — *since removed for local-only dev* |
 | Repo hygiene | 133 stray `Zone.Identifier` files | removed (gitignored too) |
 | License | none | MIT `LICENSE` |
 
@@ -28,7 +33,7 @@
 | 3 · Code quality | ✅ done | Lint/type clean; `any` removed; error handling centralized (`utils/error.ts`); leftover debug log removed |
 | 4 · UI polish | ⏭ skipped | Would need visual review; app already uses consistent Tailwind tokens |
 | 5 · Security | 🟡 partial | Already present: `helmet`, CORS allowlist, bcrypt, hashed refresh tokens, Zod validation. **Missing: rate limiting on auth routes** |
-| 6 · Tests & CI | 🟡 partial | CI added. **No automated tests exist yet** (backend `test` script is a stub) |
+| 6 · Tests & CI | 🟡 partial | CI was added then removed (local-only). **No automated tests exist yet** |
 | 7 · Deployment / demo | 🟡 partial | `LICENSE` + docs added. No deployment performed; live URLs unverified |
 | 8 · Git hygiene | ✅ done | Conventional commits, feature branch, secrets excluded |
 

@@ -2,15 +2,13 @@
 
 Build unstoppable streaks. A habit tracker that helps you stay consistent by tracking daily completions, streaks, and recovery with streak-freeze credits.
 
-> Live: https://streakflow.dpdns.org · API: https://api.streakflow.dpdns.org
-
 ## Features
 
 - **Habit tracking** — create, edit, and archive habits with custom icons and optional daily reminders.
 - **Daily completion & streaks** — mark a habit done for your local date; current and best streaks are tracked per habit.
 - **Streak freeze** — spend monthly freeze credits to protect a streak when you miss a day.
 - **Dashboard analytics** — weekly progress chart, activity heatmap, and a habit leaderboard.
-- **Accounts & profiles** — email/password or "Sign in with Google", JWT-based sessions with refresh tokens, avatar upload.
+- **Accounts & profiles** — email/password sign-up, JWT sessions with refresh tokens, avatar upload.
 - **Timezone-aware** — completions are recorded against your local date.
 
 ## Tech stack
@@ -19,31 +17,39 @@ Build unstoppable streaks. A habit tracker that helps you stay consistent by tra
 | --- | --- |
 | Frontend | React 19, TypeScript, Vite, Tailwind CSS v4, Zustand, React Router 7, axios, framer-motion |
 | Backend | Node.js, Express 5, TypeScript |
-| Database | PostgreSQL (Neon) |
+| Database | PostgreSQL (local, via `scripts/local-db.sh`) |
 | ORM | Prisma 7 (`@prisma/adapter-pg`) |
-| Auth | JWT access + refresh tokens, bcryptjs, Google OAuth (`google-auth-library`) |
+| Auth | JWT access + refresh tokens, bcryptjs |
 | Validation | Zod |
-| Media | Cloudinary (avatar uploads via multer) |
-| Hosting | Docker (per-app `Dockerfile`) |
 
-## Getting started
-
-### Prerequisites
+## Prerequisites
 
 - Node.js 22+
-- A PostgreSQL database (local, or a free Neon/Supabase instance)
+- Bash (for the local database helper script)
 
-### Backend
+## Local setup
+
+Everything runs locally. Postgres is managed by a small helper script that creates a
+user-owned cluster (no Docker, no sudo required).
+
+### 1. Start the local database
+
+```bash
+bash scripts/local-db.sh init     # first time only — creates the cluster
+bash scripts/local-db.sh start    # starts Postgres on 127.0.0.1:5433
+```
+
+Other commands: `bash scripts/local-db.sh stop` / `status`. Data lives in `~/.streakflow/pgdata`.
+
+### 2. Backend
 
 ```bash
 cd backend
-cp .env.example .env      # then fill in the values
+cp .env.example .env      # already configured for the local database
 npm install               # also runs `prisma generate`
-npm run prisma:migrate    # create/apply migrations
+npm run prisma:deploy     # apply migrations
 npm run dev               # http://localhost:3000
 ```
-
-Useful scripts:
 
 | Command | Description |
 | --- | --- |
@@ -51,14 +57,14 @@ Useful scripts:
 | `npm run build` | Compile TypeScript to `dist/` |
 | `npm run start` | Run the compiled server |
 | `npm run typecheck` | Type-check without emitting |
-| `npm run prisma:migrate` | `prisma migrate dev` |
-| `npm run prisma:deploy` | `prisma migrate deploy` (production) |
+| `npm run prisma:migrate` | `prisma migrate dev` (create/apply new migrations) |
+| `npm run prisma:deploy` | `prisma migrate deploy` (apply committed migrations) |
 
-### Frontend
+### 3. Frontend
 
 ```bash
 cd frontend
-cp .env.example .env      # then fill in the values
+cp .env.example .env      # already configured for the local backend
 npm install
 npm run dev               # http://localhost:5173
 ```
@@ -70,41 +76,46 @@ npm run dev               # http://localhost:5173
 | `npm run lint` | ESLint |
 | `npm run preview` | Serve the production build |
 
+Then open **http://localhost:5173** and sign up (or sign in) to create habits.
+
 ### Environment variables
 
-Both apps read configuration from a local `.env` file (gitignored). Copy the matching `.env.example` and fill it in.
+Both apps read configuration from a local `.env` file (gitignored).
 
-- **Backend** requires `DATABASE_URL`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`; `FRONTEND_URL` is used for CORS. Cloudinary and Google vars are optional.
-- **Frontend** requires `VITE_API_URL`. Only variables prefixed with `VITE_` are exposed to the browser.
+- **Backend** (`backend/.env`): `DATABASE_URL` points at the local Postgres
+  (`postgresql://streakflow:streakflow@127.0.0.1:5433/streakflow`). JWT secrets,
+  `FRONTEND_URL`, and the rest are pre-filled with local dev values.
+- **Frontend** (`frontend/.env`): `VITE_API_URL` points at the local API. Only
+  variables prefixed with `VITE_` are exposed to the browser.
 
-> ⚠️ Generate strong random values for the JWT secrets (e.g. `openssl rand -base64 48`). Never commit `.env`.
-
-## Demo account
-
-Sign up at `/signup` to create an account, or use the deployed demo instance if one is provided.
+The optional Cloudinary (avatar uploads) and Google OAuth integrations are blank
+locally; email/password auth works without them.
 
 ## Project structure
 
 ```
 streakflow/
-├── backend/                 # Express + Prisma API
-│   ├── prisma/              # schema.prisma + committed migrations
+├── scripts/
+│   └── local-db.sh           # start/stop the local Postgres cluster
+├── backend/                  # Express + Prisma API
+│   ├── prisma/               # schema.prisma + committed migrations
 │   └── src/
-│       ├── config/          # Zod-validated env loading
-│       ├── errors/          # AppError definitions
-│       ├── lib/             # Prisma client
-│       ├── middlewares/     # auth, validation, upload, error handling
-│       ├── modules/         # auth, habits, stats, users (routes/controller/service/schemas)
-│       ├── routes/          # /api/v1 router
-│       └── utils/           # jwt, password, date, cloudinary, http helpers
-└── frontend/                # React + Vite SPA
+│       ├── config/           # Zod-validated env loading
+│       ├── errors/           # AppError definitions
+│       ├── lib/              # Prisma client
+│       ├── middlewares/      # auth, validation, upload, error handling
+│       ├── modules/          # auth, habits, stats, users (routes/controller/service/schemas)
+│       ├── routes/           # /api/v1 router
+│       └── utils/            # jwt, password, date, cloudinary, http helpers
+└── frontend/                 # React + Vite SPA
     └── src/
-        ├── api/             # axios client + endpoint modules
-        ├── components/      # UI, grouped by feature (home, dashboard, streak)
-        ├── hooks/           # auth hydration, habit reminders
-        ├── pages/           # routed pages
-        ├── routes/          # public/protected route guards
-        └── store/           # Zustand stores (auth, habits, stats)
+        ├── api/              # axios client + endpoint modules
+        ├── components/       # UI, grouped by feature (home, dashboard, streak)
+        ├── hooks/            # auth hydration, habit reminders
+        ├── pages/            # routed pages
+        ├── routes/           # public/protected route guards
+        ├── store/            # Zustand stores (auth, habits, stats)
+        └── utils/            # error helpers
 ```
 
 ## API overview
@@ -141,9 +152,9 @@ Base URL: `/api/v1` — health check at `GET /health`.
 
 ## Roadmap / known gaps
 
-- Automated tests (the backend `test` script is currently a stub) and CI.
+- Automated tests (the backend `test` script is currently a stub).
 - Rate limiting on auth routes.
-- Screenshots in `docs/`.
+- Google sign-in and avatar upload are not wired up for local dev (need external credentials).
 
 ## License
 
