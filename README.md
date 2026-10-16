@@ -147,4 +147,4 @@ Base URL: `/api/v1` — health check at `GET /health`.
 
 ## License
 
-Not yet specified.
+MIT — see [LICENSE](LICENSE).
