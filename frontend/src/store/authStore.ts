@@ -2,12 +2,15 @@ import { create } from "zustand";
 import toast from "react-hot-toast";
 import {
   getCurrentUserApi,
+  googleLoginApi,
   logoutApi,
   signInApi,
   signUpApi,
+  updateProfileApi,
 } from "../api/auth";
+import { getErrorMessage } from "../utils/error";
 
-interface User {
+export interface User {
   id: string;
   fullName: string;
   email: string;
@@ -71,8 +74,8 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       toast.success("Login successful!");
       return true;
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || "Login failed";
+    } catch (error) {
+      const errorMsg = getErrorMessage(error, "Login failed");
       toast.error(errorMsg);
       set({
         error: errorMsg,
@@ -101,8 +104,8 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       toast.success("Registration successful!");
       return true;
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || "Registration failed";
+    } catch (error) {
+      const errorMsg = getErrorMessage(error, "Registration failed");
       toast.error(errorMsg);
       set({
         error: errorMsg,
@@ -117,8 +120,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ isLoading: true });
       await logoutApi();
       toast.success("Logged out successfully");
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Logout failed");
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Logout failed"));
     } finally {
       localStorage.removeItem("accessToken");
 
@@ -155,7 +158,7 @@ getCurrentUser: async () => {
       accessToken: latestToken,
       isLoading: false,
     });
-  } catch (error) {
+  } catch {
     localStorage.removeItem("accessToken");
 
     set({
@@ -181,13 +184,12 @@ getCurrentUser: async () => {
   updateProfile: async (data: FormData) => {
     try {
       set({ isLoading: true });
-      const { updateProfileApi } = await import("../api/auth");
       const res = await updateProfileApi(data);
       set({ user: res.data.data, isLoading: false });
       toast.success("Profile updated successfully!");
       return true;
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || "Profile update failed";
+    } catch (error) {
+      const errorMsg = getErrorMessage(error, "Profile update failed");
       toast.error(errorMsg);
       set({ isLoading: false, error: errorMsg });
       return false;
@@ -197,7 +199,6 @@ getCurrentUser: async () => {
   googleLogin: async (accessToken: string) => {
     try {
       set({ isLoading: true, error: null });
-      const { googleLoginApi } = await import("../api/auth");
       const { data } = await googleLoginApi(accessToken);
       const { user, tokens } = data.data;
 
@@ -212,8 +213,8 @@ getCurrentUser: async () => {
 
       toast.success("Successfully logged in with Google!");
       return true;
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || "Google Login failed";
+    } catch (error) {
+      const errorMsg = getErrorMessage(error, "Google Login failed");
       toast.error(errorMsg);
       set({
         error: errorMsg,

@@ -133,7 +133,7 @@ apiClient.interceptors.response.use(
         `Bearer ${newAccessToken}`;
 
       return apiClient(originalRequest);
-    } catch (refreshError: any) {
+    } catch (refreshError) {
       processQueue(refreshError);
 
       localStorage.removeItem("accessToken");

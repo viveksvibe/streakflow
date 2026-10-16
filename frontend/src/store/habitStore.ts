@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { completeHabitApi, createHabitApi, deleteHabitApi, getHabitsApi, updateHabitApi, freezeHabitApi } from "../api/habit";
 import toast from "react-hot-toast";
+import { getErrorMessage, getErrorStatus } from "../utils/error";
 
 type HabitStatus = "ACTIVE" | "INACTIVE" | "COMPLETED";
 
@@ -87,8 +88,8 @@ export const useHabitStore = create<HabitState>((set,get) => ({
                 )
             }));
 
-        } catch (error:any) {
-            const errorMsg = error.response?.data?.message || error.message || "Failed to create habit";
+        } catch (error) {
+            const errorMsg = getErrorMessage(error, "Failed to create habit");
             set({ habits: previousHabits, isLoading: false, error: errorMsg });
             toast.error(errorMsg);
             throw error;
@@ -110,8 +111,8 @@ export const useHabitStore = create<HabitState>((set,get) => ({
             }
             set({ isLoading: false });
 
-        } catch (error:any) {
-            const errorMsg = error.response?.data?.message || error.message || "Failed to complete habit";
+        } catch (error) {
+            const errorMsg = getErrorMessage(error, "Failed to complete habit");
             set((state)=>({
                 habits:state.habits.map((habit)=>habit.id === habitId ? {...habit,completedToday:false}:habit)
             }))
@@ -128,10 +129,10 @@ export const useHabitStore = create<HabitState>((set,get) => ({
         try{
             const {data} = await getHabitsApi();
             set({ habits: data.data.habits, isLoading: false });
-        }catch(error:any) {
-            const errorMsg = error.response?.data?.message || error.message || "Failed to fetch habits";
+        }catch(error) {
+            const errorMsg = getErrorMessage(error, "Failed to fetch habits");
             set({ error: errorMsg });
-            if (error.response?.status !== 401) {
+            if (getErrorStatus(error) !== 401) {
                 toast.error(errorMsg);
             }
         }
@@ -160,8 +161,8 @@ export const useHabitStore = create<HabitState>((set,get) => ({
             isLoading: false
         })) 
 
-       }catch(error:any) {
-            const errorMsg = error.response?.data?.message || error.message || "Failed to update habit";
+       }catch(error) {
+            const errorMsg = getErrorMessage(error, "Failed to update habit");
             set({ habits:previousHabits, isLoading: false, error: errorMsg });
             toast.error(errorMsg);
             throw error;
@@ -181,9 +182,9 @@ export const useHabitStore = create<HabitState>((set,get) => ({
                 throw new Error(data.message || "Failed to delete habit")
             }
 
-        } catch (error:any) {
+        } catch (error) {
             set({isLoading:false,habits:previousHabits})
-            const errorMsg = error.response?.data?.message || error.message || "Failed to delete habit";
+            const errorMsg = getErrorMessage(error, "Failed to delete habit");
             set({ error: errorMsg });
             toast.error(errorMsg);
             throw error;
@@ -202,8 +203,8 @@ export const useHabitStore = create<HabitState>((set,get) => ({
                 ),
                 isLoading: false
             }));
-        } catch (error: any) {
-            const errorMsg = error.response?.data?.message || error.message || "Failed to freeze habit";
+        } catch (error) {
+            const errorMsg = getErrorMessage(error, "Failed to freeze habit");
             set({ isLoading: false, error: errorMsg });
             toast.error(errorMsg);
             throw error;

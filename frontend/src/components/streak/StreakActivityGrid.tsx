@@ -21,7 +21,7 @@ export const StreakActivityGrid = ({ heatmap, markedToday }: Props) => {
 
     const days = heatmap.map((day, i) => {
       const isToday = i === heatmap.length - 1;
-      let bg = '';
+      let bg: string;
       let border = '';
       
       if (markedToday && isToday) {

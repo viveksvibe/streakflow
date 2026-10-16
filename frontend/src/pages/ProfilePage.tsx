@@ -1,26 +1,27 @@
-import { useState, useRef, useEffect } from "react";
-import { useAuthStore } from "../store/authStore";
+import { useState, useRef } from "react";
+import { useAuthStore, type User } from "../store/authStore";
 import { Camera, Save, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../constant";
 
 const ProfilePage = () => {
-  const { user, updateProfile, isLoading } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
+
+  if (!user) return null;
+
+  return <ProfileForm key={user.id} user={user} />;
+};
+
+const ProfileForm = ({ user }: { user: User }) => {
+  const { updateProfile, isLoading } = useAuthStore();
   const navigate = useNavigate();
 
-  const [fullName, setFullName] = useState(user?.fullName || "");
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(user?.avatarUrl || null);
+  const [fullName, setFullName] = useState(user.fullName);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(user.avatarUrl || null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (user) {
-      setFullName(user.fullName);
-      setAvatarPreview(user.avatarUrl || null);
-    }
-  }, [user]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -34,7 +35,7 @@ const ProfilePage = () => {
     e.preventDefault();
 
     const formData = new FormData();
-    if (fullName !== user?.fullName) {
+    if (fullName !== user.fullName) {
       formData.append("fullName", fullName);
     }
     if (avatarFile) {
@@ -145,7 +146,7 @@ const ProfilePage = () => {
                 </label>
                 <input
                   type="email"
-                  value={user?.email || ""}
+                  value={user.email}
                   disabled
                   className="w-full bg-gray-100 border border-black/[0.04] rounded-2xl px-4 py-3.5 text-[0.95rem] text-text-dark-secondary font-medium cursor-not-allowed"
                 />
@@ -160,7 +161,7 @@ const ProfilePage = () => {
                 type="submit"
                 disabled={
                   isLoading ||
-                  (fullName === user?.fullName && !avatarFile)
+                  (fullName === user.fullName && !avatarFile)
                 }
                 className="w-full h-[52px] bg-text-dark text-white rounded-2xl font-semibold text-[0.95rem] flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_6px_25px_rgba(0,0,0,0.2)] active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:shadow-none"
               >

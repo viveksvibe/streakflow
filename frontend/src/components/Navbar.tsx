@@ -56,13 +56,19 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
-  // Close mobile menu on route change
-  useEffect(() => {
+  const closeMenus = () => {
     setMobileOpen(false)
     setProfileOpen(false)
-  }, [location.pathname])
+  }
+
+  // Navigate and close any open menus (replaces a route-change effect)
+  const navigateTo = (path: string) => {
+    closeMenus()
+    navigate(path)
+  }
 
   const handleLogout = async () => {
+    closeMenus()
     await logout()
     navigate(ROUTES.SIGNIN)
   }
@@ -90,7 +96,7 @@ const Navbar = () => {
             {/* Logo */}
             <div
               className="cursor-pointer shrink-0"
-              onClick={() => navigate(ROUTES.HOME)}
+              onClick={() => navigateTo(ROUTES.HOME)}
             >
               <div className="flex items-center gap-2">
                 <div className="w-9 h-9 rounded-[10px] bg-gradient-to-br from-sf-teal to-sf-teal-dark flex items-center justify-center text-white shadow-[0_2px_10px_rgba(44,181,160,0.35)]">
@@ -107,7 +113,7 @@ const Navbar = () => {
               {navLinks.map((link) => (
                 <button
                   key={link.path}
-                  onClick={() => navigate(link.path)}
+                  onClick={() => navigateTo(link.path)}
                   className={`relative px-4 py-2 rounded-xl text-[0.88rem] font-semibold flex items-center gap-2 cursor-pointer transition-all duration-300 ${
                     isActive(link.path)
                       ? 'text-sf-teal'
@@ -185,10 +191,7 @@ const Navbar = () => {
                       <div className="py-1.5">
                         <button
                           className="w-full px-4 py-2.5 flex items-center gap-3 text-[0.85rem] font-medium text-text-dark-secondary hover:bg-gray-50 hover:text-text-dark cursor-pointer transition-colors duration-200"
-                          onClick={() => {
-                            setProfileOpen(false)
-                            navigate(ROUTES.PROFILE)
-                          }}
+                          onClick={() => navigateTo(ROUTES.PROFILE)}
                           id="nav-dropdown-profile"
                         >
                           <User size={16} />
@@ -297,7 +300,7 @@ const Navbar = () => {
                 {navLinks.map((link, index) => (
                   <motion.button
                     key={link.path}
-                    onClick={() => navigate(link.path)}
+                    onClick={() => navigateTo(link.path)}
                     className={`w-full px-4 py-3 rounded-xl text-[0.92rem] font-semibold flex items-center gap-3 cursor-pointer transition-all duration-300 ${
                       isActive(link.path)
                         ? 'text-sf-teal bg-sf-teal/8'
@@ -319,7 +322,7 @@ const Navbar = () => {
                 
                 {/* Profile Link (Mobile only) */}
                 <motion.button
-                  onClick={() => navigate(ROUTES.PROFILE)}
+                  onClick={() => navigateTo(ROUTES.PROFILE)}
                   className={`w-full px-4 py-3 rounded-xl text-[0.92rem] font-semibold flex items-center gap-3 cursor-pointer transition-all duration-300 ${
                     isActive(ROUTES.PROFILE)
                       ? 'text-sf-teal bg-sf-teal/8'

@@ -13,7 +13,7 @@ export const CustomTimePicker = ({ value, onChange }: Props) => {
 
   // parse value safely
   const [hStr, mStr] = (value || '08:00').split(':');
-  let hour = parseInt(hStr || '8', 10);
+  const hour = parseInt(hStr || '8', 10);
   const minute = parseInt(mStr || '0', 10);
   
   const isPM = hour >= 12;

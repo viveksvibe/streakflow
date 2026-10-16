@@ -38,7 +38,7 @@ function App() {
         setAppReady(true);
       });
     }
-  }, [getCurrentUser]);
+  }, [getCurrentUser, hydrateAuth]);
 
 
 

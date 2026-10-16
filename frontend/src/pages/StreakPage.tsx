@@ -39,7 +39,7 @@ const StreakPage = () => {
   const todayStatus = habit?.frozenToday ? 'frozen' : habit?.completedToday ? 'completed' : 'missed';
   
   // This habit is considered acted on if it was explicitly completed today or if the day was frozen
-  const isActionTakenToday = habit?.completedToday || habit?.frozenToday;
+  const isActionTakenToday = Boolean(habit?.completedToday || habit?.frozenToday);
 
   const handleMarkComplete = useCallback(async () => {
     if (habit) {

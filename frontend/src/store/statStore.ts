@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { Habit } from "./habitStore";
 import { getDashboardStatsApi } from "../api/stats";
 import toast from "react-hot-toast";
+import { getErrorMessage, getErrorStatus } from "../utils/error";
 
 
 export interface DashboardUser {
@@ -82,10 +83,10 @@ export const useStatStore = create<StatState>((set, get) => ({
                 throw new Error(data.message || "Failed to fetch dashboard stats");
             }
             set({ dashboardData: data.data, isLoading: false });
-        }catch(error:any) {
-            const errorMsg = error.response?.data?.message || error.message || "Failed to fetch dashboard stats";
+        }catch(error) {
+            const errorMsg = getErrorMessage(error, "Failed to fetch dashboard stats");
             set({ error: errorMsg, isLoading: false });
-            if (error.response?.status !== 401) {
+            if (getErrorStatus(error) !== 401) {
                 toast.error(errorMsg);
             }
         }

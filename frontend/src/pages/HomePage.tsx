@@ -20,7 +20,7 @@ const HomePage = () => {
       setIsInitialLoad(false);
     };
     fetchHabits();
-  }, [])
+  }, [getHabits])
 
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null)
