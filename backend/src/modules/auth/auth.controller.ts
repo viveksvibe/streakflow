@@ -4,6 +4,7 @@ import { AppError } from "../../errors/app-error.js";
 import { sendSuccess } from "../../utils/http-response.js";
 import {
   getCurrentUserProfile,
+  googleLoginUser,
   loginUser,
   logoutUser,
   refreshSession,
@@ -99,15 +100,16 @@ export const updateMe = asyncHandler(async (req: Request, res: Response) => {
 
 export const googleLogin = asyncHandler(async (req: Request, res: Response) => {
   const { accessToken } = req.body;
-  const { googleLoginUser } = await import("./auth.service.js");
   const data = await googleLoginUser(accessToken);
-  
-  // Set refresh token in cookie
+
+  // Set cookies using standard options
   res.cookie("refreshToken", data.tokens.refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    ...options,
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
+  res.cookie("accessToken", data.tokens.accessToken, {
+    ...options,
+    maxAge: 15 * 60 * 1000, // 15 minutes
   });
 
   sendSuccess(res, 200, { user: data.user, tokens: { accessToken: data.tokens.accessToken } });

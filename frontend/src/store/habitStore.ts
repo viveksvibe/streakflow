@@ -177,11 +177,12 @@ export const useHabitStore = create<HabitState>((set,get) => ({
         }))
         try {
             const {data} = await deleteHabitApi(habitId)
-            
+
             if(!data.success){
                 throw new Error(data.message || "Failed to delete habit")
             }
 
+            set({ isLoading: false })
         } catch (error) {
             set({isLoading:false,habits:previousHabits})
             const errorMsg = getErrorMessage(error, "Failed to delete habit");

@@ -1,38 +1,66 @@
-import { useState } from 'react'
+import { useState, useMemo, useCallback, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, X, Clock } from 'lucide-react'
 import { useHabitStore } from '../../store/habitStore'
-import { CustomTimePicker } from '../CustomTimePicker'
+import { CustomTimePicker } from '../common/CustomTimePicker'
 
-const emojiOptions = ['🏃', '📖', '🧘', '💧', '💪', '🎯', '🎨', '🎵', '✍️', '🧹', '🥗', '😴']
+// Defined outside the component — reference is stable across renders
+const EMOJI_OPTIONS = ['🏃', '📖', '🧘', '💧', '💪', '🎯', '🎨', '🎵', '✍️', '🧹', '🥗', '😴']
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export const AddHabitModal = ({ isOpen, onClose }: Props) => {
+export const AddHabitModal = memo(({ isOpen, onClose }: Props) => {
   const { createHabit } = useHabitStore()
-  
+
   const [name, setName] = useState('')
   const [icon, setIcon] = useState('✨')
   const [scheduleEnabled, setScheduleEnabled] = useState(false)
   const [scheduleTime, setScheduleTime] = useState('08:00')
 
-  const handleAdd = () => {
+  const handleAdd = useCallback(() => {
     if (!name.trim()) return
     createHabit({
       name: name.trim(),
       icon,
       reminderEnabled: scheduleEnabled,
       reminderTime: scheduleEnabled ? (scheduleTime || '08:00') : undefined,
-    })
+    }).catch(() => {})
     setName('')
     setIcon('✨')
     setScheduleEnabled(false)
     setScheduleTime('08:00')
     onClose()
-  }
+  }, [name, icon, scheduleEnabled, scheduleTime, createHabit, onClose])
+
+  const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setName(e.target.value)
+  }, [])
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') handleAdd()
+  }, [handleAdd])
+
+  const toggleSchedule = useCallback(() => setScheduleEnabled((v) => !v), [])
+
+  const emojiButtons = useMemo(() => (
+    EMOJI_OPTIONS.map((emoji) => (
+      <button
+        key={emoji}
+        type="button"
+        className={`w-10 h-10 rounded-xl text-lg flex items-center justify-center cursor-pointer transition-all duration-200 ${
+          icon === emoji
+            ? 'bg-brand/15 ring-2 ring-brand scale-110'
+            : 'bg-well hover:bg-line'
+        }`}
+        onClick={() => setIcon(emoji)}
+      >
+        {emoji}
+      </button>
+    ))
+  ), [icon])
 
   return (
     <AnimatePresence>
@@ -45,69 +73,59 @@ export const AddHabitModal = ({ isOpen, onClose }: Props) => {
           />
           <motion.div className="fixed inset-0 z-50 flex items-center justify-center px-6 sm:px-8 pointer-events-none">
             <motion.div
-              className="w-full max-w-md bg-white rounded-3xl p-7 sm:p-9 shadow-[0_16px_60px_rgba(0,0,0,0.18)] relative pointer-events-auto"
+              className="w-full max-w-md bg-surface rounded-3xl p-7 sm:p-9 shadow-[var(--sf-card-shadow)] border border-line relative pointer-events-auto"
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             >
+              {/* AUDIT FIX [5.3]: Accessible label for modal close button */}
               <button
-                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-colors cursor-pointer"
+                type="button"
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-well flex items-center justify-center text-ink-mute hover:bg-line hover:text-ink transition-colors cursor-pointer"
                 onClick={onClose}
+                aria-label="Close dialog"
               >
                 <X size={16} />
               </button>
 
-              <h3 className="text-lg font-bold text-text-dark mb-5">New Habit</h3>
+              <h3 className="text-lg font-bold text-ink mb-5">New Habit</h3>
 
-              <label className="text-[0.82rem] font-medium text-text-dark-secondary mb-1.5 block">
+              <label className="text-[0.82rem] font-medium text-ink-mid mb-1.5 block">
                 Habit Name
               </label>
               <input
                 type="text"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={handleNameChange}
                 placeholder="e.g. Morning Yoga"
-                className="w-full h-12 px-4 rounded-xl border border-gray-200 bg-gray-50 text-text-dark text-[0.92rem] font-medium outline-none transition-all duration-200 focus:border-sf-teal focus:ring-2 focus:ring-sf-teal/15 placeholder:text-gray-300"
+                className="w-full h-12 px-4 rounded-xl border border-line bg-well text-ink text-[0.92rem] font-medium outline-none transition-all duration-200 focus:border-brand-ring focus:ring-2 focus:ring-brand-ring/20 placeholder:text-ink-mute"
                 autoFocus
-                onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+                onKeyDown={handleKeyDown}
               />
 
-              <label className="text-[0.82rem] font-medium text-text-dark-secondary mt-4 mb-2 block">
+              <label className="text-[0.82rem] font-medium text-ink-mid mt-4 mb-2 block">
                 Choose an Icon
               </label>
               <div className="flex flex-wrap gap-2">
-                {emojiOptions.map((emoji) => (
-                  <button
-                    key={emoji}
-                    type="button"
-                    className={`w-10 h-10 rounded-xl text-lg flex items-center justify-center cursor-pointer transition-all duration-200 ${
-                      icon === emoji
-                        ? 'bg-sf-teal/15 ring-2 ring-sf-teal scale-110'
-                        : 'bg-gray-100 hover:bg-gray-200'
-                    }`}
-                    onClick={() => setIcon(emoji)}
-                  >
-                    {emoji}
-                  </button>
-                ))}
+                {emojiButtons}
               </div>
 
               <div className="mt-4">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-[0.82rem] font-medium text-text-dark-secondary flex items-center gap-1.5">
-                    <Clock size={14} className="text-sf-teal" />
+                  <label className="text-[0.82rem] font-medium text-ink-mid flex items-center gap-1.5">
+                    <Clock size={14} className="text-brand" />
                     Schedule Reminder
                   </label>
                   <button
                     type="button"
                     className={`relative w-11 h-6 rounded-full transition-colors duration-300 cursor-pointer ${
-                      scheduleEnabled ? 'bg-sf-teal' : 'bg-gray-200'
+                      scheduleEnabled ? 'bg-brand' : 'bg-line'
                     }`}
-                    onClick={() => setScheduleEnabled(!scheduleEnabled)}
+                    onClick={toggleSchedule}
                   >
                     <span
-                      className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ${
+                      className={`absolute top-0.5 left-0.5 w-5 h-5 bg-surface rounded-full shadow-md transition-transform duration-300 ${
                         scheduleEnabled ? 'translate-x-5' : 'translate-x-0'
                       }`}
                     />
@@ -129,7 +147,7 @@ export const AddHabitModal = ({ isOpen, onClose }: Props) => {
               </div>
 
               <motion.button
-                className="w-full h-12 mt-6 bg-surface-dark text-white rounded-xl text-[0.92rem] font-semibold flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.25)] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full h-12 mt-6 bg-ink text-on-brand rounded-xl text-[0.92rem] font-semibold flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.2)] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed"
                 onClick={handleAdd}
                 disabled={!name.trim()}
                 whileTap={{ scale: 0.97 }}
@@ -143,4 +161,6 @@ export const AddHabitModal = ({ isOpen, onClose }: Props) => {
       )}
     </AnimatePresence>
   )
-}
+})
+
+AddHabitModal.displayName = 'AddHabitModal'

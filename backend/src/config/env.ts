@@ -12,9 +12,11 @@ const result = config({ path: envPath });
 
 if (result.error) {
   // Not a fatal error — env vars may come from docker run -e or --env-file
-  console.warn(`[env] No .env file found at: ${envPath} (will use process environment)`);
-} else {
-  console.log(`[env] Loaded .env from: ${envPath} (${Object.keys(result.parsed || {}).length} vars)`);
+  if (process.env.NODE_ENV !== "test") {
+    console.warn(`[env] No .env file found at: backend/.env (will use process environment)`);
+  }
+} else if (process.env.NODE_ENV !== "test") {
+  console.log(`[env] Loaded .env from: backend/.env (${Object.keys(result.parsed || {}).length} vars)`);
 }
 
 const envSchema = z.object({

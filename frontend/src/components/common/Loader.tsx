@@ -37,20 +37,20 @@ export default function Loader({ variant = 'fullscreen', message = 'Loading' }: 
           className="absolute inset-0 rounded-full"
           style={{
             border: '2.5px solid transparent',
-            borderTopColor: isFullscreen ? 'rgba(255,255,255,0.7)' : '#2cb5a0',
-            borderRightColor: isFullscreen ? 'rgba(255,255,255,0.2)' : 'rgba(44,181,160,0.2)',
+            borderTopColor: isFullscreen ? 'rgba(255,255,255,0.7)' : 'var(--sf-brand)',
+            borderRightColor: isFullscreen ? 'rgba(255,255,255,0.2)' : 'color-mix(in srgb, var(--sf-brand) 20%, transparent)',
           }}
           animate={{ rotate: 360 }}
           transition={{ duration: 1.4, repeat: Infinity, ease: 'linear' }}
         />
 
-        {/* Second ring — counter‑rotate */}
+        {/* Second ring — counter-rotate */}
         <motion.div
           className="absolute inset-2 rounded-full"
           style={{
             border: '2px solid transparent',
-            borderBottomColor: isFullscreen ? 'rgba(255,255,255,0.45)' : 'rgba(44,181,160,0.45)',
-            borderLeftColor: isFullscreen ? 'rgba(255,255,255,0.1)' : 'rgba(44,181,160,0.1)',
+            borderBottomColor: isFullscreen ? 'rgba(255,255,255,0.45)' : 'color-mix(in srgb, var(--sf-brand) 45%, transparent)',
+            borderLeftColor: isFullscreen ? 'rgba(255,255,255,0.1)' : 'color-mix(in srgb, var(--sf-brand) 10%, transparent)',
           }}
           animate={{ rotate: -360 }}
           transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
@@ -64,22 +64,22 @@ export default function Loader({ variant = 'fullscreen', message = 'Loading' }: 
         >
           <div
             className={`absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full shadow-lg ${
-              isFullscreen ? 'bg-white' : 'bg-sf-teal'
+              isFullscreen ? 'bg-white' : 'bg-brand'
             }`}
             style={{
               boxShadow: isFullscreen
                 ? '0 0 12px rgba(255,255,255,0.6)'
-                : '0 0 12px rgba(44,181,160,0.5)',
+                : '0 0 12px color-mix(in srgb, var(--sf-brand) 50%, transparent)',
             }}
           />
         </motion.div>
 
-        {/* Center glass card with flame */}
+        {/* Center card with flame */}
         <motion.div
           className={`w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-2xl flex items-center justify-center ${
             isFullscreen
               ? 'bg-white/15 border border-white/25 backdrop-blur-xl'
-              : 'bg-sf-teal/10 border border-sf-teal/20'
+              : 'bg-brand/10 border border-brand/20'
           }`}
           animate={{ scale: [1, 1.08, 1] }}
           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
@@ -91,7 +91,7 @@ export default function Loader({ variant = 'fullscreen', message = 'Loading' }: 
             <Flame
               size={28}
               strokeWidth={2}
-              className={isFullscreen ? 'text-white' : 'text-sf-teal'}
+              className={isFullscreen ? 'text-white' : 'text-brand'}
             />
           </motion.div>
         </motion.div>
@@ -107,11 +107,11 @@ export default function Loader({ variant = 'fullscreen', message = 'Loading' }: 
         {/* Logo text */}
         <h2
           className={`text-xl sm:text-2xl font-bold tracking-tight ${
-            isFullscreen ? 'text-white' : 'text-text-dark'
+            isFullscreen ? 'text-white' : 'text-ink'
           }`}
         >
           Streak
-          <span className={isFullscreen ? 'text-white/70' : 'text-sf-teal'}>
+          <span className={isFullscreen ? 'text-white/70' : 'text-brand'}>
             Flow
           </span>
         </h2>
@@ -120,7 +120,7 @@ export default function Loader({ variant = 'fullscreen', message = 'Loading' }: 
         <div className="flex items-center gap-0.5">
           <span
             className={`text-sm font-medium ${
-              isFullscreen ? 'text-white/60' : 'text-text-dark-secondary'
+              isFullscreen ? 'text-white/60' : 'text-ink-mute'
             }`}
           >
             {message}
@@ -130,7 +130,7 @@ export default function Loader({ variant = 'fullscreen', message = 'Loading' }: 
               <motion.span
                 key={i}
                 className={`inline-block w-[4px] h-[4px] rounded-full ${
-                  isFullscreen ? 'bg-white/50' : 'bg-text-dark-secondary'
+                  isFullscreen ? 'bg-white/50' : 'bg-ink-mute'
                 }`}
                 animate={{ opacity: [0.2, 1, 0.2], y: [0, -3, 0] }}
                 transition={{

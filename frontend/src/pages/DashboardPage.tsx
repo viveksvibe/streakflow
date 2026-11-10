@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useStatStore } from "../store/statStore";
-import Loader from "../components/Loader";
+import Loader from "../components/common/Loader";
 import { DashboardHeader } from "../components/dashboard/DashboardHeader";
 import { DashboardTodayCard } from "../components/dashboard/DashboardTodayCard";
 import { DashboardWeeklyChart } from "../components/dashboard/DashboardWeeklyChart";
@@ -16,7 +16,7 @@ const DashboardPage = () => {
 
   if (!dashboardData) {
     return (
-      <div className="min-h-[100dvh] flex flex-col bg-gradient-to-b from-[#e8faf6] to-white">
+      <div className="min-h-[100dvh] flex flex-col bg-page">
         <Loader variant="inline" message="Loading dashboard" />
       </div>
     );
@@ -25,7 +25,7 @@ const DashboardPage = () => {
   const { user, today, stats } = dashboardData;
 
   return (
-    <div className="min-h-[100dvh] flex flex-col pb-10 bg-gradient-to-b from-[#e8faf6] to-white">
+    <div className="min-h-[100dvh] flex flex-col pb-10 bg-page">
       <div className="max-w-6xl mx-auto w-full px-5 sm:px-6 lg:px-8">
         <DashboardHeader user={user} />
         <DashboardTodayCard today={today} />

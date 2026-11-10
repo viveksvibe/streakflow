@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useStatStore } from '../store/statStore'
 import { useHabitStore } from '../store/habitStore'
-import Loader from '../components/Loader'
+import Loader from '../components/common/Loader'
 import { StreakHeader } from '../components/streak/StreakHeader'
 import { StreakCurrentCard } from '../components/streak/StreakCurrentCard'
 import { StreakActivityGrid } from '../components/streak/StreakActivityGrid'
@@ -65,19 +65,14 @@ const StreakPage = () => {
 
   if (!dashboardData) {
     return (
-      <div className="min-h-[100dvh] flex flex-col bg-gradient-to-b from-[#e8faf6] to-white">
+      <div className="min-h-[100dvh] flex flex-col bg-page">
         <Loader variant="inline" message="Loading streak" />
       </div>
     );
   }
 
   return (
-    <div
-      className="min-h-[100dvh] flex flex-col"
-      style={{
-        background: 'linear-gradient(180deg, #e8faf6 0%, #f0fdf9 30%, #f7fdfb 60%, #ffffff 100%)',
-      }}
-    >
+    <div className="min-h-[100dvh] flex flex-col bg-page">
       <div className="max-w-6xl mx-auto w-full px-5 sm:px-6 lg:px-8 flex-1 flex flex-col">
         <StreakHeader 
           habit={habit} 

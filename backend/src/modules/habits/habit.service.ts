@@ -242,14 +242,29 @@ export const completeHabitForToday = async (userId: string, habitId: string) => 
       };
     }
 
-    await tx.habitCompletion.create({
-      data: {
-        userId,
-        habitId,
-        localDate: today.localDate,
-        timezone: habit.user.timezone,
-      },
-    });
+    try {
+      await tx.habitCompletion.create({
+        data: {
+          userId,
+          habitId,
+          localDate: today.localDate,
+          timezone: habit.user.timezone,
+        },
+      });
+    } catch (error) {
+      // A concurrent request may have completed the habit first.
+      if ((error as { code?: string })?.code === "P2002") {
+        return {
+          alreadyCompleted: true,
+          localDate: today.localDate,
+          currentStreak: habit.progress?.currentStreak ?? 0,
+          bestStreak: habit.progress?.bestStreak ?? 0,
+          consumedFreeze: false,
+          remainingFreezes: habit.user.streakFreezeCredits,
+        };
+      }
+      throw error;
+    }
 
     const existingProgress = habit.progress;
     let nextCurrentStreak = 1;
@@ -354,6 +369,22 @@ export const freezeHabitForToday = async (userId: string, habitId: string) => {
       throw new AppError("Streak freeze already used for today", 400);
     }
 
+    const existingProgress = habit.progress;
+
+    // A freeze only makes sense while an active streak can still be saved:
+    // the habit must have been completed yesterday and not today.
+    if (!existingProgress?.lastCompletedDate || existingProgress.currentStreak <= 0) {
+      throw new AppError("No active streak to freeze", 400);
+    }
+
+    const dayGap = diffLocalDates(existingProgress.lastCompletedDate, today.localDate);
+    if (dayGap !== 1) {
+      throw new AppError(
+        "Streak freeze is only valid the day after the last completion",
+        400,
+      );
+    }
+
     await tx.user.update({
       where: { id: userId },
       data: {
@@ -371,22 +402,9 @@ export const freezeHabitForToday = async (userId: string, habitId: string) => {
       },
     });
 
-    const existingProgress = habit.progress;
-    let currentStreak = existingProgress?.currentStreak ?? 0;
-    let bestStreak = existingProgress?.bestStreak ?? 0;
-
-    // Check if the streak is already broken before freezing today
-    if (existingProgress?.lastCompletedDate) {
-      const dayGap = diffLocalDates(existingProgress.lastCompletedDate, today.localDate);
-      // A dayGap of 1 means they completed it yesterday, so freezing today is valid to maintain the streak.
-      // If dayGap > 1, they missed yesterday. Since they are freezing today, yesterday remains missed.
-      // So the streak is irrevocably broken.
-      if (dayGap > 1) {
-        currentStreak = 0;
-      }
-    }
-
-    bestStreak = Math.max(bestStreak, currentStreak);
+    // Freezing protects the streak for today without incrementing it.
+    const currentStreak = existingProgress.currentStreak;
+    const bestStreak = Math.max(existingProgress.bestStreak, currentStreak);
 
     await tx.habitProgress.upsert({
       where: { habitId },

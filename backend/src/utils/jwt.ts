@@ -5,17 +5,20 @@ import { AppError } from "../errors/app-error.js";
 type AccessPayload = {
   sub: string;
   email: string;
+  nonce?: string;
 };
 
 type RefreshPayload = {
   sub: string;
   email: string;
+  nonce?: string;
 };
 
 type TokenPayload = jwt.JwtPayload & {
   sub: string;
   email: string;
   exp: number;
+  nonce?: string;
 };
 
 const parsePayload = (decoded: string | jwt.JwtPayload): TokenPayload => {

@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
+/* Class-based dark mode (Tailwind v4) */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ===== Custom Theme via Tailwind v4 CSS-first config ===== */
 @theme {
-  /* Brand Colors */
+  /* Brand Colors (static, both modes — dashboard still uses these) */
   --color-sf-teal-dark: #1a8a7d;
   --color-sf-teal: #2cb5a0;
   --color-sf-teal-light: #4dc9b4;
@@ -29,6 +32,109 @@
 
   /* Font */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Bricolage Grotesque', 'Inter', sans-serif;
+
+  /* ===== Ledger identity (static accents, both modes) ===== */
+  --color-spruce: #1F6F5C;  /* the "done" green */
+  --color-frost: #9AB8B0;   /* freeze / recovery */
+  --color-ember: #E4572E;   /* the single hot accent */
+  --color-paper: #F2F4F2;   /* light ledger paper */
+
+  /* ===== Ledger semantics: flip with theme ===== */
+  --color-page: var(--sf-page);
+  --color-surface: var(--sf-surface);
+  --color-well: var(--sf-well);
+  --color-line: var(--sf-line);
+  --color-ink: var(--sf-text);        /* primary text + strong outline */
+  --color-ink-mid: var(--sf-text-mid);
+  --color-ink-mute: var(--sf-text-mute);
+  --color-brand: var(--sf-brand);
+  --color-on-brand: var(--sf-on-brand);
+  --color-brand-ring: var(--sf-brand-ring);
+  --color-done-bg: var(--sf-done-bg);
+  --color-danger: var(--sf-danger-solid);
+  --color-danger-soft: var(--sf-danger-bg);
+  --color-danger-line: var(--sf-danger-line);
+  --color-danger-text: var(--sf-danger-text);
+  --color-focus: var(--sf-focus);
+}
+
+/* ===== Semantic palette — default: light ===== */
+:root {
+  --sf-page: #F2F4F2;          /* slate-morning cool paper */
+  --sf-surface: #FFFFFF;       /* raised card */
+  --sf-well: #EEF3F0;          /* input wells, quiet cells */
+  --sf-line: #D6E0DA;          /* hairline borders */
+  --sf-text: #10241E;          /* ink, deep evergreen */
+  --sf-text-mid: #3D5C4F;      /* secondary copy, 4.5:1+ on page */
+  --sf-text-mute: #5F7C6E;     /* hints, labels, calendar letters */
+  --sf-danger-bg: #FBEDE6;
+  --sf-danger-line: #EBC7B6;
+  --sf-danger-text: #C2410C;   /* 4.7:1 on danger-bg */
+  --sf-danger-solid: #DC2626;  /* delete / destructive actions */
+  --sf-focus: #10241E;
+  --sf-invert-bg: #10241E;     /* the Google/solid swap button */
+  --sf-invert-text: #F2F4F2;
+  --sf-check-border: rgba(16, 36, 30, 0.35);
+  --sf-check-bg: rgba(16, 36, 30, 0.05);
+  --sf-card-shadow: 0 28px 60px -36px rgba(16, 36, 30, 0.25);
+  --sf-done-bg: #E9F5F1;           /* completed-day tint */
+
+  /* Semantic couples for hardcoded-style contexts */
+  --sf-on-spruce: #F2F4F2;     /* text on spruce fills */
+  --sf-freeze: #3D5C4F;        /* the big freeze numeral */
+  --sf-ember-cta: #FFF6F2;     /* text on ember CTA */
+
+  /* One brand green, shared with the dashboard's sf-teal family.
+     Green = the site-wide "alive/done/interactive" color. */
+  --sf-brand: #1a8a7d;         /* sf-teal-dark — 4.2:1 under a white glyph */
+  --sf-on-brand: #FFFFFF;
+  --sf-brand-ring: #1a8a7d;    /* input focus accent */
+}
+
+html.dark {
+  /* ── Surfaces ───────────────────────────────────────────────────────────
+     Refined dark slate with subtle cool green undertone — mirrors the light
+     theme's aesthetic with proper depth and contrast. page → surface → well
+     creates clear visual hierarchy without harsh saturation.               */
+  --sf-page: #0d1210;          /* deep dark green-tinted base                 */
+  --sf-surface: #131917;       /* raised cards — distinct from page           */
+  --sf-well: #1a2220;          /* input wells, inner cells                    */
+  --sf-line: #262f2d;          /* hairline borders — subtle but visible       */
+
+  /* ── Text ──────────────────────────────────────────────────────────────  */
+  --sf-text: #E8E9E8;          /* clean off-white — high contrast              */
+  --sf-text-mid: #A8B4B0;      /* secondary copy — softer but readable         */
+  --sf-text-mute: #6E7C76;     /* hints, labels, placeholders                 */
+
+  /* ── Danger ─────────────────────────────────────────────────────────── */
+  --sf-danger-bg: #2a1a17;
+  --sf-danger-line: #452820;
+  --sf-danger-text: #F8A090;
+  --sf-danger-solid: #EF4444;
+
+  /* ── Misc ───────────────────────────────────────────────────────────── */
+  --sf-focus: #E8E9E8;
+  --sf-invert-bg: #E8E9E8;
+  --sf-invert-text: #0d1210;
+  --sf-check-border: rgba(232, 233, 232, 0.25);
+  --sf-check-bg: rgba(232, 233, 232, 0.05);
+  --sf-card-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 8px 32px rgba(0, 0, 0, 0.3);
+  --sf-done-bg: rgba(44, 181, 160, 0.15);
+
+  --sf-on-spruce: #E8E9E8;
+  --sf-freeze: #A0B8B0;
+  --sf-ember-cta: #FFF6F2;
+
+  /* ── Brand ──────────────────────────────────────────────────────────── */
+  --sf-brand: #3db8a4;         /* slightly brighter teal for dark mode         */
+  --sf-on-brand: #0d1210;      /* dark text on bright teal, ~9:1              */
+  --sf-brand-ring: #4cc9b5;
+}
+
+/* Ensure body text uses semantic colors */
+body {
+  color: var(--sf-text);
 }
 
 /* ===== Global Resets ===== */
@@ -38,30 +144,96 @@ html {
 }
 
 body {
-  background: linear-gradient(
-    170deg,
-    #1a8a7d 0%,
-    #2cb5a0 20%,
-    #5ec4a8 35%,
-    #b8a89a 50%,
-    #d4916e 65%,
-    #c96b8a 80%,
-    #8b6b8a 100%
-  );
+  background: var(--sf-page);
   min-height: 100vh;
   font-family: var(--font-sans);
 }
 
+/* Smooth mode cross-fade — applied one-shot while swapping themes */
+html.theme-transitioning,
+html.theme-transitioning body,
+html.theme-transitioning body *,
+html.theme-transitioning body svg *,
+html.theme-transitioning body circle,
+html.theme-transitioning body path {
+  transition:
+    background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    fill 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    stroke 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* ===== Logbook identity: shared utilities (welcome + auth pages) ===== */
+
+/* The one hot CTA on any page */
+.btn-ember {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 52px;
+  padding: 0 28px;
+  border-radius: 14px;
+  background: var(--color-ember);
+  color: var(--sf-ember-cta);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(228, 87, 46, 0.25);
+}
+.btn-ember:hover {
+  background: #EE6238;
+  box-shadow: 0 4px 12px rgba(228, 87, 46, 0.35);
+  transform: translateY(-1px);
+}
+.btn-ember:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(228, 87, 46, 0.25);
+}
+.btn-ember:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+/* Solid button in the opposite polarity (Google sign-in button) */
+.btn-swap {
+  background: var(--sf-invert-bg);
+  color: var(--sf-invert-text);
+  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+.btn-swap:hover {
+  background: color-mix(in srgb, var(--sf-invert-bg) 86%, var(--sf-ember-cta));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.btn-swap:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+/* Quiet inline link treatment */
+.underline-2 {
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+}
+
 /* ===== Custom Scrollbar ===== */
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
+  background: var(--sf-line);
+  border-radius: 3px;
+  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--sf-text-mid);
 }
 
 /* ===== Custom Checkbox ===== */
@@ -70,17 +242,20 @@ input[type="checkbox"].custom-check {
   -webkit-appearance: none;
   width: 20px;
   height: 20px;
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border: 1.5px solid var(--sf-check-border);
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--sf-check-bg);
   cursor: pointer;
   position: relative;
   flex-shrink: 0;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+input[type="checkbox"].custom-check:hover {
+  border-color: var(--sf-text-mid);
 }
 input[type="checkbox"].custom-check:checked {
-  background: #2cb5a0;
-  border-color: #2cb5a0;
+  background: var(--sf-invert-bg);
+  border-color: var(--sf-invert-bg);
 }
 input[type="checkbox"].custom-check:checked::after {
   content: '✓';
@@ -88,7 +263,7 @@ input[type="checkbox"].custom-check:checked::after {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: white;
+  color: var(--sf-invert-text);
   font-size: 12px;
   font-weight: 700;
 }
@@ -117,25 +292,45 @@ input[type="checkbox"].custom-check:checked::after {
 
 /* ===== Progress ring styles ===== */
 .progress-ring-bg {
-  stroke: #e8f0ef;
+  stroke: var(--sf-well);
 }
 .progress-ring-fill {
-  stroke: #2cb5a0;
+  stroke: var(--sf-brand);
 }
 
 /* ===== Custom Native Time Picker ===== */
 input[type="time"] {
   color-scheme: light;
-  accent-color: #2cb5a0;
+  accent-color: var(--sf-brand);
 }
+
+html.dark input[type="time"] {
+  color-scheme: dark;
+}
+
 input[type="time"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
   opacity: 0.6;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   /* Tint to sf-teal */
   filter: invert(53%) sepia(87%) saturate(347%) hue-rotate(125deg) brightness(90%) contrast(92%);
+}
+html.dark input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(100%) brightness(85%);
 }
 input[type="time"]::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
   transform: scale(1.1);
+}
+
+/* ===== Selection styling ===== */
+::selection {
+  background: var(--sf-brand);
+  color: var(--sf-on-brand);
+}
+
+/* ===== Focus visible improvement ===== */
+:focus-visible {
+  outline: 2px solid var(--sf-brand-ring);
+  outline-offset: 2px;
 }

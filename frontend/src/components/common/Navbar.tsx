@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
@@ -13,8 +13,9 @@ import {
   Loader2,
 } from 'lucide-react'
 
-import { useAuthStore } from '../store/authStore'
-import { ROUTES } from '../constant'
+import { useAuthStore } from '../../store/authStore'
+import { ROUTES } from '../../constant'
+import ThemeToggle from './ThemeToggle'
 
 interface NavLink {
   label: string
@@ -22,13 +23,14 @@ interface NavLink {
   icon: React.ReactNode
 }
 
+// Defined outside the component so the array reference never changes
 const navLinks: NavLink[] = [
   { label: 'Home', path: ROUTES.HOME, icon: <Home size={18} /> },
   { label: 'Dashboard', path: ROUTES.DASHBOARD, icon: <BarChart3 size={18} /> },
   { label: 'Streaks', path: ROUTES.STREAK, icon: <Flame size={18} /> },
 ]
 
-const Navbar = () => {
+const Navbar = memo(() => {
   const location = useLocation()
   const navigate = useNavigate()
   const { user, logout, isLoading } = useAuthStore()
@@ -56,26 +58,32 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
-  const closeMenus = () => {
+  const closeMenus = useCallback(() => {
     setMobileOpen(false)
     setProfileOpen(false)
-  }
+  }, [])
 
-  // Navigate and close any open menus (replaces a route-change effect)
-  const navigateTo = (path: string) => {
+  const navigateTo = useCallback((path: string) => {
     closeMenus()
     navigate(path)
-  }
+  }, [closeMenus, navigate])
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     closeMenus()
     await logout()
     navigate(ROUTES.SIGNIN)
-  }
+  }, [closeMenus, logout, navigate])
 
-  const isActive = (path: string) => location.pathname === path
+  const toggleProfile = useCallback(() => setProfileOpen((o) => !o), [])
+  const toggleMobile = useCallback(() => setMobileOpen((o) => !o), [])
+  const closeMobile = useCallback(() => setMobileOpen(false), [])
 
-  const userInitial = user?.fullName?.charAt(0)?.toUpperCase() || 'U'
+  const isActive = useCallback((path: string) => location.pathname === path, [location.pathname])
+
+  const userInitial = useMemo(
+    () => user?.fullName?.charAt(0)?.toUpperCase() || 'U',
+    [user?.fullName]
+  )
 
   return (
     <>
@@ -83,9 +91,9 @@ const Navbar = () => {
       <motion.nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
-            ? 'bg-white/80 shadow-[0_2px_24px_rgba(0,0,0,0.08)]'
-            : 'bg-white/50 shadow-none'
-        } backdrop-blur-xl`}
+            ? 'bg-surface/90 shadow-[0_2px_24px_rgba(0,0,0,0.08)]'
+            : 'bg-surface/60 shadow-none'
+        } backdrop-blur-xl border-b border-line/50`}
         initial={{ y: -80 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: [0.25, 1, 0.5, 1] }}
@@ -99,11 +107,11 @@ const Navbar = () => {
               onClick={() => navigateTo(ROUTES.HOME)}
             >
               <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-[10px] bg-gradient-to-br from-sf-teal to-sf-teal-dark flex items-center justify-center text-white shadow-[0_2px_10px_rgba(44,181,160,0.35)]">
+                <div className="w-9 h-9 rounded-[10px] bg-gradient-to-br from-sf-teal to-sf-teal-dark flex items-center justify-center text-on-brand shadow-[0_2px_10px_rgba(44,181,160,0.35)]">
                   <Flame size={20} strokeWidth={2.2} />
                 </div>
-                <span className="text-lg font-bold text-text-dark tracking-tight">
-                  Streak<span className="text-sf-teal">Flow</span>
+                <span className="text-lg font-bold text-ink tracking-tight">
+                  Streak<span className="text-brand">Flow</span>
                 </span>
               </div>
             </div>
@@ -116,8 +124,8 @@ const Navbar = () => {
                   onClick={() => navigateTo(link.path)}
                   className={`relative px-4 py-2 rounded-xl text-[0.88rem] font-semibold flex items-center gap-2 cursor-pointer transition-all duration-300 ${
                     isActive(link.path)
-                      ? 'text-sf-teal'
-                      : 'text-text-dark-secondary hover:text-text-dark hover:bg-black/[0.04]'
+                      ? 'text-brand'
+                      : 'text-ink-mid hover:text-ink hover:bg-ink/[0.04]'
                   }`}
                   id={`nav-${link.label.toLowerCase()}`}
                 >
@@ -136,34 +144,37 @@ const Navbar = () => {
               ))}
             </div>
 
-            {/* Right side: Profile + Mobile hamburger */}
+            {/* Right side: ThemeToggle + Profile + Mobile hamburger */}
             <div className="flex items-center gap-2">
+              {/* Theme Toggle (always visible) */}
+              <ThemeToggle />
+
               {/* Profile Dropdown (desktop) */}
               <div className="hidden md:block relative" ref={profileRef}>
                 <button
-                  onClick={() => setProfileOpen(!profileOpen)}
+                  onClick={toggleProfile}
                   className={`flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-full cursor-pointer transition-all duration-300 ${
                     profileOpen
-                      ? 'bg-sf-teal/10'
-                      : 'hover:bg-black/[0.04]'
+                      ? 'bg-brand/10'
+                      : 'hover:bg-ink/[0.04]'
                   }`}
                   id="nav-profile-btn"
                 >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-sf-teal-light to-sf-teal flex items-center justify-center text-white text-sm font-bold overflow-hidden shadow-[0_2px_8px_rgba(44,181,160,0.3)] shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-sf-teal-light to-sf-teal flex items-center justify-center text-on-brand text-sm font-bold overflow-hidden shadow-[0_2px_8px_rgba(44,181,160,0.3)] shrink-0">
                     {user?.avatarUrl ? (
                       <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                     ) : (
                       userInitial
                     )}
                   </div>
-                  <span className="text-[0.85rem] font-semibold text-text-dark max-w-[120px] truncate">
+                  <span className="text-[0.85rem] font-semibold text-ink max-w-[120px] truncate">
                     {user?.fullName || 'User'}
                   </span>
                   <motion.div
                     animate={{ rotate: profileOpen ? 180 : 0 }}
                     transition={{ duration: 0.25 }}
                   >
-                    <ChevronDown size={14} className="text-text-dark-secondary" />
+                    <ChevronDown size={14} className="text-ink-mid" />
                   </motion.div>
                 </button>
 
@@ -171,18 +182,18 @@ const Navbar = () => {
                 <AnimatePresence>
                   {profileOpen && (
                     <motion.div
-                      className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.12)] border border-black/[0.06] overflow-hidden z-50"
+                      className="absolute right-0 mt-2 w-56 bg-surface rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.14)] border border-line overflow-hidden z-50"
                       initial={{ opacity: 0, y: -8, scale: 0.96 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -8, scale: 0.96 }}
                       transition={{ duration: 0.2, ease: 'easeOut' }}
                     >
                       {/* User info */}
-                      <div className="px-4 py-3.5 border-b border-black/[0.06]">
-                        <p className="text-[0.88rem] font-bold text-text-dark truncate">
+                      <div className="px-4 py-3.5 border-b border-line">
+                        <p className="text-[0.88rem] font-bold text-ink truncate">
                           {user?.fullName}
                         </p>
-                        <p className="text-[0.75rem] text-text-dark-secondary truncate mt-0.5">
+                        <p className="text-[0.75rem] text-ink-mute truncate mt-0.5">
                           {user?.email}
                         </p>
                       </div>
@@ -190,7 +201,7 @@ const Navbar = () => {
                       {/* Menu items */}
                       <div className="py-1.5">
                         <button
-                          className="w-full px-4 py-2.5 flex items-center gap-3 text-[0.85rem] font-medium text-text-dark-secondary hover:bg-gray-50 hover:text-text-dark cursor-pointer transition-colors duration-200"
+                          className="w-full px-4 py-2.5 flex items-center gap-3 text-[0.85rem] font-medium text-ink-mid hover:bg-well hover:text-ink cursor-pointer transition-colors duration-200"
                           onClick={() => navigateTo(ROUTES.PROFILE)}
                           id="nav-dropdown-profile"
                         >
@@ -198,7 +209,7 @@ const Navbar = () => {
                           Profile
                         </button>
                         <button
-                          className={`w-full px-4 py-2.5 flex items-center gap-3 text-[0.85rem] font-medium text-red-400 hover:bg-red-50 hover:text-red-500 cursor-pointer transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed`}
+                          className="w-full px-4 py-2.5 flex items-center gap-3 text-[0.85rem] font-medium text-danger-text hover:bg-danger-soft hover:text-danger cursor-pointer transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                           onClick={handleLogout}
                           disabled={isLoading}
                           id="nav-dropdown-logout"
@@ -214,8 +225,8 @@ const Navbar = () => {
 
               {/* Mobile hamburger */}
               <button
-                className="md:hidden w-10 h-10 rounded-xl flex items-center justify-center text-text-dark hover:bg-black/[0.04] cursor-pointer transition-colors duration-200"
-                onClick={() => setMobileOpen(!mobileOpen)}
+                className="md:hidden w-10 h-10 rounded-xl flex items-center justify-center text-ink hover:bg-ink/[0.04] cursor-pointer transition-colors duration-200"
+                onClick={toggleMobile}
                 id="nav-mobile-toggle"
               >
                 <AnimatePresence mode="wait">
@@ -253,25 +264,25 @@ const Navbar = () => {
           <>
             {/* Backdrop */}
             <motion.div
-              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
+              className="fixed inset-0 bg-black/25 backdrop-blur-sm z-40 md:hidden"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setMobileOpen(false)}
+              onClick={closeMobile}
             />
 
             {/* Drawer */}
             <motion.div
-              className="fixed top-0 right-0 bottom-0 w-[280px] bg-white/95 backdrop-blur-2xl shadow-[-8px_0_40px_rgba(0,0,0,0.1)] z-50 flex flex-col md:hidden"
+              className="fixed top-0 right-0 bottom-0 w-[280px] bg-surface/95 backdrop-blur-2xl shadow-[-8px_0_40px_rgba(0,0,0,0.12)] z-50 flex flex-col md:hidden border-l border-line"
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 300 }}
             >
               {/* Drawer header */}
-              <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-black/[0.06]">
+              <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-line">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sf-teal-light to-sf-teal flex items-center justify-center text-white text-lg font-bold overflow-hidden shadow-[0_2px_8px_rgba(44,181,160,0.3)] shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sf-teal-light to-sf-teal flex items-center justify-center text-on-brand text-lg font-bold overflow-hidden shadow-[0_2px_8px_rgba(44,181,160,0.3)] shrink-0">
                     {user?.avatarUrl ? (
                       <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                     ) : (
@@ -279,17 +290,17 @@ const Navbar = () => {
                     )}
                   </div>
                   <div>
-                    <p className="text-[0.9rem] font-bold text-text-dark truncate max-w-[160px]">
+                    <p className="text-[0.9rem] font-bold text-ink truncate max-w-[160px]">
                       {user?.fullName || 'User'}
                     </p>
-                    <p className="text-[0.72rem] text-text-dark-secondary truncate max-w-[160px]">
+                    <p className="text-[0.72rem] text-ink-mute truncate max-w-[160px]">
                       {user?.email}
                     </p>
                   </div>
                 </div>
                 <button
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-text-dark-secondary hover:bg-gray-100 cursor-pointer transition-colors"
-                  onClick={() => setMobileOpen(false)}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-ink-mid hover:bg-well cursor-pointer transition-colors"
+                  onClick={closeMobile}
                 >
                   <X size={18} />
                 </button>
@@ -303,8 +314,8 @@ const Navbar = () => {
                     onClick={() => navigateTo(link.path)}
                     className={`w-full px-4 py-3 rounded-xl text-[0.92rem] font-semibold flex items-center gap-3 cursor-pointer transition-all duration-300 ${
                       isActive(link.path)
-                        ? 'text-sf-teal bg-sf-teal/8'
-                        : 'text-text-dark-secondary hover:text-text-dark hover:bg-gray-50'
+                        ? 'text-brand bg-brand/8'
+                        : 'text-ink-mid hover:text-ink hover:bg-well'
                     }`}
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -313,20 +324,19 @@ const Navbar = () => {
                   >
                     {link.icon}
                     {link.label}
-
                     {isActive(link.path) && (
-                      <div className="ml-auto w-2 h-2 rounded-full bg-sf-teal" />
+                      <div className="ml-auto w-2 h-2 rounded-full bg-brand" />
                     )}
                   </motion.button>
                 ))}
-                
-                {/* Profile Link (Mobile only) */}
+
+                {/* Profile Link */}
                 <motion.button
                   onClick={() => navigateTo(ROUTES.PROFILE)}
                   className={`w-full px-4 py-3 rounded-xl text-[0.92rem] font-semibold flex items-center gap-3 cursor-pointer transition-all duration-300 ${
                     isActive(ROUTES.PROFILE)
-                      ? 'text-sf-teal bg-sf-teal/8'
-                      : 'text-text-dark-secondary hover:text-text-dark hover:bg-gray-50'
+                      ? 'text-brand bg-brand/8'
+                      : 'text-ink-mid hover:text-ink hover:bg-well'
                   }`}
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -336,15 +346,21 @@ const Navbar = () => {
                   <User size={18} />
                   Profile
                   {isActive(ROUTES.PROFILE) && (
-                    <div className="ml-auto w-2 h-2 rounded-full bg-sf-teal" />
+                    <div className="ml-auto w-2 h-2 rounded-full bg-brand" />
                   )}
                 </motion.button>
+
+                {/* Theme toggle row in mobile drawer */}
+                <div className="px-4 py-3 flex items-center justify-between">
+                  <span className="text-[0.92rem] font-semibold text-ink-mid">Theme</span>
+                  <ThemeToggle />
+                </div>
               </div>
 
               {/* Logout */}
-              <div className="px-3 pb-6 pt-2 border-t border-black/[0.06]">
+              <div className="px-3 pb-6 pt-2 border-t border-line">
                 <motion.button
-                  className={`w-full px-4 py-3 rounded-xl text-[0.92rem] font-semibold flex items-center gap-3 text-red-400 hover:bg-red-50 hover:text-red-500 cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed`}
+                  className="w-full px-4 py-3 rounded-xl text-[0.92rem] font-semibold flex items-center gap-3 text-danger-text hover:bg-danger-soft hover:text-danger cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={handleLogout}
                   disabled={isLoading}
                   initial={{ opacity: 0, y: 10 }}
@@ -365,6 +381,8 @@ const Navbar = () => {
       <div className="h-16 sm:h-[68px]" />
     </>
   )
-}
+})
+
+Navbar.displayName = 'Navbar'
 
 export default Navbar

@@ -1,19 +1,23 @@
-# ──────────────────────────────────────────────
-# StreakFlow — root .gitignore
-# Covers both frontend/ and backend/ (patterns are not path-anchored)
-# ──────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────
+# StreakFlow — Root .gitignore
+# Covers Monorepo Root, Frontend, and Backend
+# ─────────────────────────────────────────────────────────────
 
 # Dependencies
 node_modules/
+.pnp
+.pnp.js
 
-# Build output
+# Build Outputs & Bundles
 dist/
+dist-ssr/
 build/
+out/
 .vite/
 *.tsbuildinfo
 .eslintcache
 
-# Env files & secrets — never commit these
+# Environment variables & secrets (NEVER commit secrets)
 .env
 .env.*
 .env.local
@@ -22,6 +26,8 @@ build/
 *.pem
 *.p12
 *.key
+*.cert
+*.bak
 
 # Logs
 logs/
@@ -31,32 +37,42 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Test / coverage
+# Testing & Coverage
 coverage/
 .nyc_output/
+vitest-reporters/
 
-# Caches
+# Local Database & Prisma
+prisma/*.db
+prisma/*.db-journal
+
+# Temporary caches & scratch files
 .cache/
 .temp/
 .tmp/
-
-# Local uploads
 uploads/
 
-# OS junk
+# Agent / Tooling state
+.agents/
+.devin/
+skills-lock.json
+
+# Operating System Files
 .DS_Store
 .DS_Store?
 ._*
 Thumbs.db
 Desktop.ini
 
-# Windows / WSL "Zone.Identifier" alternate-data-stream artifacts
+# Windows / WSL Alternate Data Stream artifacts
 *Zone.Identifier*
 *:Zone.Identifier
 
-# Editors
+# IDE & Editor configurations
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
 .idea/
 *.swp
+*.swo
+*~

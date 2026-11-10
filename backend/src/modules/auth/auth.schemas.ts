@@ -40,3 +40,12 @@ export const logoutSchema = z.object({
   params: z.object({}).optional(),
   query: z.object({}).optional(),
 });
+
+export const updateProfileSchema = z.object({
+  body: z
+    .object({
+      fullName: z.string().trim().min(2, "Name must be at least 2 characters").max(80, "Name is too long").optional(),
+    }),
+  params: z.object({}).optional(),
+  query: z.object({}).optional(),
+});

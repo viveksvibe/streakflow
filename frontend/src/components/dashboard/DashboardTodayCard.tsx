@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { TrendingUp } from "lucide-react";
 import type { DashboardTodayStats } from "../../store/statStore";
 
@@ -5,20 +6,22 @@ interface Props {
   today: DashboardTodayStats;
 }
 
-export const DashboardTodayCard = ({ today }: Props) => (
-  <div className="mt-6 bg-white p-5 rounded-2xl shadow-sm">
+export const DashboardTodayCard = memo(({ today }: Props) => (
+  <div className="mt-6 bg-surface border border-line p-5 rounded-2xl shadow-[var(--sf-card-shadow)]">
     <div className="flex justify-between items-center">
       <div>
-        <p className="text-sm text-gray-500">Today</p>
-        <h2 className="text-2xl font-bold text-gray-800">
+        <p className="text-[0.8rem] sm:text-sm text-ink-mute">Today</p>
+        <h2 className="font-display text-2xl font-bold text-ink tabular-nums">
           {today.completedHabits} / {today.totalHabits}
         </h2>
       </div>
 
-      <div className="flex items-center gap-2 text-sf-teal font-semibold">
+      <div className="flex items-center gap-2 text-brand font-semibold text-[0.9rem] sm:text-[0.95rem]">
         <TrendingUp size={18} />
         {today.completionRate}%
       </div>
     </div>
   </div>
-);
+));
+
+DashboardTodayCard.displayName = 'DashboardTodayCard';

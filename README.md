@@ -1,161 +1,233 @@
 # StreakFlow
 
-Build unstoppable streaks. A habit tracker that helps you stay consistent by tracking daily completions, streaks, and recovery with streak-freeze credits.
+> Build unstoppable streaks. A production-ready full-stack habit tracking application designed to help users establish consistent daily habits, protect momentum with monthly streak freeze credits, and visualize long-term consistency.
+
+---
 
 ## Features
 
-- **Habit tracking** — create, edit, and archive habits with custom icons and optional daily reminders.
-- **Daily completion & streaks** — mark a habit done for your local date; current and best streaks are tracked per habit.
-- **Streak freeze** — spend monthly freeze credits to protect a streak when you miss a day.
-- **Dashboard analytics** — weekly progress chart, activity heatmap, and a habit leaderboard.
-- **Accounts & profiles** — email/password sign-up, JWT sessions with refresh tokens, avatar upload.
-- **Timezone-aware** — completions are recorded against your local date.
+- **Habit Management** — Create, edit, and archive habits with custom icons, color tags, and optional scheduled reminders.
+- **Timezone-Aware Completions** — Completions are evaluated against the user's local calendar day, ensuring accurate streak calculation regardless of UTC differences.
+- **Streak Freeze Protection** — Missed a day? Consume auto-replenished monthly freeze credits to preserve your active streak without resetting to zero.
+- **Rich Dashboard & Visualizations** — Weekly completion bar charts, GitHub-style 365-day activity heatmaps, and habit consistency leaderboards.
+- **Secure Authentication** — Dual-token session management (short-lived JWT access tokens + rotated, cryptographically hashed refresh tokens stored in `httpOnly` cookies), password hashing via bcryptjs, and optional Google OAuth sign-in.
+- **Production Hardened** — Express 5 with Helmet security headers, Pino structured logging with request ID tracing, sliding-window rate limiting, automated bot detection, and recursive XSS/HTML input sanitization.
+- **Accessible & Compliant** — WCAG AA compliant contrast, keyboard-accessible controls, screen reader labels, responsive mobile navigation, Cookie Consent banner, Privacy Policy, and Terms of Service.
 
-## Tech stack
+---
 
-| Layer | Technology |
+## Tech Stack
+
+### Frontend
+| Component | Technology |
 | --- | --- |
-| Frontend | React 19, TypeScript, Vite, Tailwind CSS v4, Zustand, React Router 7, axios, framer-motion |
-| Backend | Node.js, Express 5, TypeScript |
-| Database | PostgreSQL (local, via `scripts/local-db.sh`) |
-| ORM | Prisma 7 (`@prisma/adapter-pg`) |
-| Auth | JWT access + refresh tokens, bcryptjs |
-| Validation | Zod |
+| Framework | [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) |
+| Build Tool | [Vite](https://vitejs.dev/) |
+| Styling | [Tailwind CSS v4](https://tailwindcss.com/) with custom CSS design tokens |
+| State Management | [Zustand](https://zustand.docs.pmnd.rs/) |
+| Routing | [React Router 7](https://reactrouter.com/) |
+| Animation | [Framer Motion](https://www.framer.com/motion/) |
+| Icons & Notifications | [Lucide React](https://lucide.dev/), [react-hot-toast](https://react-hot-toast.com/) |
+| HTTP Client | [Axios](https://axios-http.com/) with interceptors |
+
+### Backend
+| Component | Technology |
+| --- | --- |
+| Runtime & Framework | [Node.js](https://nodejs.org/) (>= 22), [Express 5](https://expressjs.com/) |
+| Language | [TypeScript](https://www.typescriptlang.org/) (ESM, NodeNext) |
+| Database | [PostgreSQL](https://www.postgresql.org/) (local cluster on port 5433) |
+| ORM | [Prisma 7](https://www.prisma.io/) with `@prisma/adapter-pg` driver adapter |
+| Validation | [Zod](https://zod.dev/) |
+| Security | Helmet, custom sliding-window rate limiter, bot detection, input sanitizer |
+| Observability | [Pino](https://getpino.io/) structured logging with `x-request-id` correlation |
+| Testing | [Vitest](https://vitest.dev/), Supertest |
+
+---
 
 ## Prerequisites
 
-- Node.js 22+
-- Bash (for the local database helper script)
+- **Node.js** >= 22.0.0
+- **npm** >= 10.0.0
+- **PostgreSQL** instance running locally on port `5433` (or Docker)
 
-## Local setup
+---
 
-Everything runs locally. Postgres is managed by a small helper script that creates a
-user-owned cluster (no Docker, no sudo required).
+## Getting Started
 
-### 1. Start the local database
+### 1. Database Setup
 
+Ensure PostgreSQL is listening on port `5433`:
+
+#### Option A: Run via Docker (Recommended)
 ```bash
-bash scripts/local-db.sh init     # first time only — creates the cluster
-bash scripts/local-db.sh start    # starts Postgres on 127.0.0.1:5433
+docker run --name streakflow-db \
+  -e POSTGRES_USER=streakflow \
+  -e POSTGRES_PASSWORD=streakflow \
+  -e POSTGRES_DB=streakflow \
+  -p 5433:5432 \
+  -d postgres:18-alpine
 ```
 
-Other commands: `bash scripts/local-db.sh stop` / `status`. Data lives in `~/.streakflow/pgdata`.
+#### Option B: Local PostgreSQL Installation
+Configure a local database named `streakflow` owned by user `streakflow` (password: `streakflow`) configured to accept connections on `127.0.0.1:5433`.
 
-### 2. Backend
+---
+
+### 2. Backend Setup
 
 ```bash
 cd backend
-cp .env.example .env      # already configured for the local database
-npm install               # also runs `prisma generate`
-npm run prisma:deploy     # apply migrations
-npm run dev               # http://localhost:3000
+
+# Copy sample environment configuration
+cp .env.example .env
+
+# Install dependencies (automatically runs prisma generate)
+npm install
+
+# Run database migrations
+npm run prisma:deploy
+
+# Start backend in development mode (hot-reloads on port 3000)
+npm run dev
 ```
 
-| Command | Description |
-| --- | --- |
-| `npm run dev` | Start with hot reload (`tsx watch`) |
-| `npm run build` | Compile TypeScript to `dist/` |
-| `npm run start` | Run the compiled server |
-| `npm run typecheck` | Type-check without emitting |
-| `npm run prisma:migrate` | `prisma migrate dev` (create/apply new migrations) |
-| `npm run prisma:deploy` | `prisma migrate deploy` (apply committed migrations) |
+#### Available Backend Scripts
 
-### 3. Frontend
+| Script | Purpose |
+| --- | --- |
+| `npm run dev` | Start development server with `tsx watch` |
+| `npm run build` | Compile TypeScript into `dist/` |
+| `npm run start` | Run compiled production bundle from `dist/index.js` |
+| `npm run typecheck` | Run type checking without emitting files (`tsc --noEmit`) |
+| `npm test` | Run Vitest unit and integration test suite |
+| `npm run test:watch` | Run Vitest in interactive watch mode |
+| `npm run test:ui` | Open Vitest graphical test dashboard in browser |
+| `npm run prisma:migrate`| Generate and apply local migrations (`prisma migrate dev`) |
+| `npm run prisma:deploy` | Apply committed migrations (`prisma migrate deploy`) |
+
+---
+
+### 3. Frontend Setup
+
+In a separate terminal:
 
 ```bash
 cd frontend
-cp .env.example .env      # already configured for the local backend
+
+# Copy sample environment configuration
+cp .env.example .env
+
+# Install dependencies
 npm install
-npm run dev               # http://localhost:5173
+
+# Start Vite development server (hot-reloads on port 5173)
+npm run dev
 ```
 
-| Command | Description |
+Open **http://localhost:5173** in your browser.
+
+#### Available Frontend Scripts
+
+| Script | Purpose |
 | --- | --- |
-| `npm run dev` | Vite dev server |
-| `npm run build` | Type-check + production build to `dist/` |
-| `npm run lint` | ESLint |
-| `npm run preview` | Serve the production build |
+| `npm run dev` | Start Vite dev server on `http://localhost:5173` |
+| `npm run build` | Type-check (`tsc -b`) and build for production (`dist/`) |
+| `npm run preview` | Locally preview production build |
+| `npm run lint` | Run ESLint check |
 
-Then open **http://localhost:5173** and sign up (or sign in) to create habits.
+---
 
-### Environment variables
-
-Both apps read configuration from a local `.env` file (gitignored).
-
-- **Backend** (`backend/.env`): `DATABASE_URL` points at the local Postgres
-  (`postgresql://streakflow:streakflow@127.0.0.1:5433/streakflow`). JWT secrets,
-  `FRONTEND_URL`, and the rest are pre-filled with local dev values.
-- **Frontend** (`frontend/.env`): `VITE_API_URL` points at the local API. Only
-  variables prefixed with `VITE_` are exposed to the browser.
-
-The optional Cloudinary (avatar uploads) and Google OAuth integrations are blank
-locally; email/password auth works without them.
-
-## Project structure
+## Project Structure
 
 ```
 streakflow/
-├── scripts/
-│   └── local-db.sh           # start/stop the local Postgres cluster
-├── backend/                  # Express + Prisma API
-│   ├── prisma/               # schema.prisma + committed migrations
+├── backend/
+│   ├── prisma/
+│   │   ├── migrations/            # Committed SQL migrations
+│   │   └── schema.prisma          # Database models (User, Habit, Completion, RefreshToken)
 │   └── src/
-│       ├── config/           # Zod-validated env loading
-│       ├── errors/           # AppError definitions
-│       ├── lib/              # Prisma client
-│       ├── middlewares/      # auth, validation, upload, error handling
-│       ├── modules/          # auth, habits, stats, users (routes/controller/service/schemas)
-│       ├── routes/           # /api/v1 router
-│       └── utils/            # jwt, password, date, cloudinary, http helpers
-└── frontend/                 # React + Vite SPA
-    └── src/
-        ├── api/              # axios client + endpoint modules
-        ├── components/       # UI, grouped by feature (home, dashboard, streak)
-        ├── hooks/            # auth hydration, habit reminders
-        ├── pages/            # routed pages
-        ├── routes/           # public/protected route guards
-        ├── store/            # Zustand stores (auth, habits, stats)
-        └── utils/            # error helpers
+│       ├── config/                # Environment schema validation (env.ts)
+│       ├── errors/                # Typed AppError classes
+│       ├── lib/                   # Prisma client, Pino logger
+│       ├── middlewares/           # Auth, bot protection, rate limit, request-id, sanitize, errors
+│       ├── modules/
+│       │   ├── auth/              # Auth routes, schemas, controller, and token rotation
+│       │   ├── habits/            # Habit CRUD, completion, and freeze mechanics
+│       │   ├── stats/             # Dashboard metrics, heatmap, leaderboard
+│       │   └── users/             # Profile updates, avatar uploads, freeze credit refill
+│       ├── routes/                # Central API router (/api/v1)
+│       ├── tests/                 # Unit and integration test suites
+│       └── utils/                 # JWT, password, date/timezone math, HTTP response helpers
+├── frontend/
+│   ├── public/                    # Favicon, icons, static assets
+│   └── src/
+│       ├── api/                   # Axios client & typed API endpoints
+│       ├── components/
+│       │   ├── common/            # Shared primitives (Navbar, Loader, CookieConsent, etc.)
+│       │   ├── dashboard/         # Dashboard statistics, heatmap, weekly chart, leaderboard
+│       │   ├── home/              # Habit lists, add/edit/delete modals, daily progress
+│       │   └── streak/            # Streak cards, freeze usage UI, completion grid
+│       ├── hooks/                 # Theme, app hydration, navigation helpers
+│       ├── pages/                 # Home, Dashboard, Streaks, Profile, SignIn, SignUp, Legal, 404
+│       ├── routes/                # Protected and public route guards
+│       ├── store/                 # Zustand stores (authStore, habitStore)
+│       └── index.css              # Tailwind v4 theme configuration & design tokens
+├── .gitignore                     # Monorepo git exclusion configuration
+└── README.md                      # Project documentation
 ```
 
-## API overview
+---
 
-Base URL: `/api/v1` — health check at `GET /health`.
+## API Reference
 
-| Method | Endpoint | Auth | Description |
+All application endpoints are served under `/api/v1`. Standard health endpoint is available at `/health`.
+
+Every response adheres to a consistent response envelope:
+```json
+{
+  "success": true,
+  "message": "Optional message",
+  "data": { ... },
+  "requestId": "uuid"
+}
+```
+
+### Endpoints
+
+| Method | Endpoint | Auth Required | Description |
 | --- | --- | --- | --- |
-| GET | `/` | – | Service info |
-| POST | `/auth/register` | – | Create an account |
-| POST | `/auth/login` | – | Email/password login |
-| POST | `/auth/google` | – | Sign in with Google |
-| POST | `/auth/refresh` | cookie | Rotate the access token |
-| POST | `/auth/logout` | – | Revoke the refresh token |
-| GET | `/auth/me` | ✅ | Current user |
-| PATCH | `/auth/me` | ✅ | Update profile / avatar |
-| GET | `/habits` | ✅ | List habits |
-| POST | `/habits` | ✅ | Create a habit |
-| PATCH | `/habits/:habitId` | ✅ | Update a habit |
-| DELETE | `/habits/:habitId` | ✅ | Archive a habit |
-| POST | `/habits/:habitId/complete-today` | ✅ | Mark done for today |
-| POST | `/habits/:habitId/freeze-today` | ✅ | Use a streak freeze |
-| GET | `/stats/dashboard` | ✅ | Dashboard summary |
-| GET | `/stats/weekly-progress` | ✅ | Weekly progress |
-| GET | `/stats/activity-heatmap` | ✅ | Activity heatmap |
-| GET | `/stats/habit-leaderboard` | ✅ | Habit leaderboard |
+| `GET` | `/health` | No | System health check and database ping |
+| `POST` | `/api/v1/auth/register` | No | Register user account |
+| `POST` | `/api/v1/auth/login` | No | Authenticate with email/password |
+| `POST` | `/api/v1/auth/google` | No | Authenticate via Google ID Token |
+| `POST` | `/api/v1/auth/refresh` | Cookie | Rotate JWT token pair |
+| `POST` | `/api/v1/auth/logout` | No | Invalidate refresh token and clear cookies |
+| `GET` | `/api/v1/auth/me` | Bearer / Cookie | Get current authenticated user profile |
+| `PATCH`| `/api/v1/auth/me` | Bearer / Cookie | Update user profile / avatar |
+| `GET` | `/api/v1/habits` | Bearer / Cookie | List user habits with today's completion status |
+| `POST` | `/api/v1/habits` | Bearer / Cookie | Create a new habit |
+| `PATCH`| `/api/v1/habits/:habitId` | Bearer / Cookie | Update habit name, icon, or reminder |
+| `DELETE`| `/api/v1/habits/:habitId` | Bearer / Cookie | Soft-delete / archive habit |
+| `POST` | `/api/v1/habits/:habitId/complete-today` | Bearer / Cookie | Toggle daily habit completion |
+| `POST` | `/api/v1/habits/:habitId/freeze-today` | Bearer / Cookie | Spend freeze credit to protect streak |
+| `GET` | `/api/v1/stats/dashboard` | Bearer / Cookie | Get overall user progress and streaks |
+| `GET` | `/api/v1/stats/weekly-progress` | Bearer / Cookie | Get 7-day completion breakdown |
+| `GET` | `/api/v1/stats/activity-heatmap` | Bearer / Cookie | Get yearly completion density map |
+| `GET` | `/api/v1/stats/habit-leaderboard` | Bearer / Cookie | Get habits ranked by streak length |
 
-## Decisions and trade-offs
+---
 
-- **JWT access + refresh tokens** keep the API stateless while allowing short-lived access tokens; refresh tokens are hashed and stored server-side so they can be revoked.
-- **Prisma with the pg adapter** gives typed queries and committed migrations against Postgres.
-- **Zod** validates every request body in one place (`validateRequest` middleware) for consistent error shapes.
-- **Timezone-aware completions** store a `localDate` string alongside the timezone, so streaks follow the user's day rather than UTC.
+## Security & Reliability Design
 
-## Roadmap / known gaps
+- **SQL Injection Defense**: All queries are parameterized via Prisma ORM; raw query inputs are disallowed.
+- **Cross-Site Scripting (XSS)**: Recursive sanitization middleware strips hazardous HTML tags, inline event listeners (`onclick=`), and `javascript:` URIs from input payloads.
+- **Brute-Force & DDoS Mitigation**: In-memory sliding-window rate limiting isolates sensitive auth routes (5 attempts per 15 minutes with block windows).
+- **Bot Detection**: Rejects automated scanners and known exploit user agents (`sqlmap`, `nmap`, `nikto`, headless bots) with `403 Forbidden`.
+- **Tenant Isolation**: All habit and statistics queries strictly scope database operations to `userId` extracted from validated JWT access tokens.
+- **Fail-Safe Error Handling**: Centralized error funnel guarantees internal server errors never leak raw database stack traces or confidential credentials to the client.
 
-- Automated tests (the backend `test` script is currently a stub).
-- Rate limiting on auth routes.
-- Google sign-in and avatar upload are not wired up for local dev (need external credentials).
+---
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+This project is licensed under the [MIT License](LICENSE).

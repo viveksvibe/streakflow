@@ -4,11 +4,8 @@ import { prisma } from "../../lib/prisma.js";
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../../utils/jwt.js";
 import { comparePassword, hashPassword } from "../../utils/password.js";
 import { hashToken } from "../../utils/token.js";
-import { OAuth2Client } from "google-auth-library";
 import { env } from "../../config/env.js";
 import crypto from "crypto";
-
-const client = new OAuth2Client(env.GOOGLE_CLIENT_ID);
 
 type DbClient = PrismaClient | Prisma.TransactionClient;
 
@@ -46,8 +43,11 @@ const issueTokenPair = async (
   db: DbClient,
   user: { id: string; email: string },
 ) => {
+  // A nonce guarantees each refresh token (and therefore its stored hash)
+  // is unique even when signed within the same second as a previous one.
+  const nonce = crypto.randomUUID();
   const accessToken = signAccessToken({ sub: user.id, email: user.email });
-  const refreshToken = signRefreshToken({ sub: user.id, email: user.email });
+  const refreshToken = signRefreshToken({ sub: user.id, email: user.email, nonce });
   const refreshPayload = verifyRefreshToken(refreshToken);
 
   await db.refreshToken.create({
@@ -63,33 +63,55 @@ const issueTokenPair = async (
 
 export const registerUser = async (payload: RegisterPayload) => {
   const email = payload.email.trim().toLowerCase();
-  const existingUser = await prisma.user.findUnique({ where: { email } });
+  const existingUser = await prisma.user.findUnique({
+    where: { email },
+    select: { id: true },
+  });
 
   if (existingUser) {
     throw new AppError("Email is already in use", 409);
   }
 
-  const user = await prisma.user.create({
-    data: {
-      fullName: payload.fullName.trim(),
-      email,
-      passwordHash: await hashPassword(payload.password),
-      timezone: payload.timezone ?? "UTC",
-    },
-    select: {
-      id: true,
-      fullName: true,
-      email: true,
-      timezone: true,
-      streakFreezeCredits: true,
-      avatarUrl: true,
-      createdAt: true,
-    },
-  });
+  try {
+    // Create the user and their refresh token atomically so a failure
+    // mid-way cannot leave a user without valid tokens behind.
+    return await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          fullName: payload.fullName.trim(),
+          email,
+          passwordHash: await hashPassword(payload.password),
+          timezone: payload.timezone ?? "UTC",
+        },
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          timezone: true,
+          streakFreezeCredits: true,
+          avatarUrl: true,
+          createdAt: true,
+        },
+      });
 
-  const tokens = await issueTokenPair(prisma, user);
-  
-  return { user: sanitizeUser(user), tokens };
+      const tokens = await issueTokenPair(tx, user);
+      return { user: sanitizeUser(user), tokens };
+    });
+  } catch (error) {
+    // Concurrent registrations for the same email lose the unique-index race.
+    if ((error as { code?: string })?.code === "P2002") {
+      throw new AppError("Email is already in use", 409);
+    }
+    throw error;
+  }
+};
+
+// Comparing against this instead of returning early hides whether an email
+// exists from timing-based user enumeration.
+let dummyHashPromise: Promise<string> | null = null;
+const getDummyPasswordHash = () => {
+  dummyHashPromise ??= hashPassword(crypto.randomBytes(18).toString("hex"));
+  return dummyHashPromise;
 };
 
 export const loginUser = async (payload: LoginPayload) => {
@@ -109,6 +131,7 @@ export const loginUser = async (payload: LoginPayload) => {
   });
 
   if (!user) {
+    await comparePassword(payload.password, await getDummyPasswordHash());
     throw new AppError("Invalid credentials", 401);
   }
 
@@ -125,40 +148,64 @@ export const refreshSession = async (refreshToken: string) => {
   const payload = verifyRefreshToken(refreshToken);
   const tokenHash = hashToken(refreshToken);
 
-  const storedToken = await prisma.refreshToken.findUnique({
-    where: { tokenHash },
-    include: {
-      user: {
-        select: {
-          id: true,
-          fullName: true,
-          email: true,
-          timezone: true,
-          streakFreezeCredits: true,
-          avatarUrl: true,
-          createdAt: true,
+  // Rotate atomically: the presented token is revoked and replaced in one
+  // transaction so a replayed token can never yield two live sessions.
+  return await prisma.$transaction(async (tx) => {
+    const storedToken = await tx.refreshToken.findUnique({
+      where: { tokenHash },
+      include: {
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            timezone: true,
+            streakFreezeCredits: true,
+            avatarUrl: true,
+            createdAt: true,
+          },
         },
       },
-    },
+    });
+
+    if (!storedToken || storedToken.revokedAt || storedToken.expiresAt < new Date()) {
+      throw new AppError("Refresh token is invalid or expired", 401);
+    }
+
+    if (storedToken.userId !== payload.sub) {
+      throw new AppError("Refresh token mismatch", 401);
+    }
+
+    const newRefreshToken = signRefreshToken({
+      sub: storedToken.user.id,
+      email: storedToken.user.email,
+      nonce: crypto.randomUUID(),
+    });
+    const newRefreshPayload = verifyRefreshToken(newRefreshToken);
+
+    await tx.refreshToken.update({
+      where: { id: storedToken.id },
+      data: { revokedAt: new Date() },
+    });
+
+    await tx.refreshToken.create({
+      data: {
+        userId: storedToken.userId,
+        tokenHash: hashToken(newRefreshToken),
+        expiresAt: new Date(newRefreshPayload.exp * 1000),
+      },
+    });
+
+    const accessToken = signAccessToken({
+      sub: storedToken.user.id,
+      email: storedToken.user.email,
+    });
+
+    return {
+      user: sanitizeUser(storedToken.user),
+      tokens: { accessToken, refreshToken: newRefreshToken },
+    };
   });
-
-  if (!storedToken || storedToken.revokedAt || storedToken.expiresAt < new Date()) {
-    throw new AppError("Refresh token is invalid or expired", 401);
-  }
-
-  if (storedToken.userId !== payload.sub) {
-    throw new AppError("Refresh token mismatch", 401);
-  }
-
-  const accessToken = signAccessToken({
-    sub: storedToken.user.id,
-    email: storedToken.user.email,
-  });
-
-  return {
-    user: sanitizeUser(storedToken.user),
-    tokens: { accessToken, refreshToken },
-  };
 };
 
 export const logoutUser = async (refreshToken?: string) => {
@@ -222,21 +269,28 @@ export const updateUserProfile = async (
 };
 
 export const googleLoginUser = async (accessToken: string) => {
-  const response = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
-  
+  let response: Awaited<ReturnType<typeof fetch>>;
+  try {
+    response = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+  } catch {
+    throw new AppError("Could not verify Google access token", 401);
+  }
+
   if (!response.ok) {
     throw new AppError("Invalid Google Access Token", 401);
   }
-  
-  const payload = await response.json();
-  
-  if (!payload || !payload.email) {
+
+  const payload = await response.json().catch(() => null);
+
+  if (!payload || !payload.email || typeof payload.email !== "string") {
     throw new AppError("Could not retrieve email from Google", 401);
   }
-  
+
   const email = payload.email.trim().toLowerCase();
+  const picture = typeof payload.picture === "string" ? payload.picture : null;
+  const name = typeof payload.name === "string" && payload.name.trim().length > 0 ? payload.name : "Google User";
   
   let user = await prisma.user.findUnique({
     where: { email },
@@ -255,32 +309,56 @@ export const googleLoginUser = async (accessToken: string) => {
   if (!user) {
     // Register new user via Google
     const randomPassword = crypto.randomBytes(32).toString('hex');
-    user = await prisma.user.create({
-      data: {
-        fullName: payload.name || "Google User",
-        email,
-        passwordHash: await hashPassword(randomPassword),
-        timezone: "UTC",
-        avatarUrl: payload.picture,
-      },
-      select: {
-        id: true,
-        fullName: true,
-        email: true,
-        timezone: true,
-        passwordHash: true,
-        streakFreezeCredits: true,
-        avatarUrl: true,
-        createdAt: true,
-      },
-    });
+    try {
+      user = await prisma.user.create({
+        data: {
+          fullName: name,
+          email,
+          passwordHash: await hashPassword(randomPassword),
+          timezone: "UTC",
+          avatarUrl: picture,
+        },
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          timezone: true,
+          passwordHash: true,
+          streakFreezeCredits: true,
+          avatarUrl: true,
+          createdAt: true,
+        },
+      });
+    } catch (error) {
+      // A concurrent Google login may have created the user first.
+      if ((error as { code?: string })?.code !== "P2002") {
+        throw error;
+      }
+      const existing = await prisma.user.findUnique({
+        where: { email },
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          timezone: true,
+          passwordHash: true,
+          streakFreezeCredits: true,
+          avatarUrl: true,
+          createdAt: true,
+        },
+      });
+      if (!existing) {
+        throw new AppError("Could not create account from Google profile", 500);
+      }
+      user = existing;
+    }
   } else {
-    if (!user.avatarUrl && payload.picture) {
+    if (!user.avatarUrl && picture) {
       await prisma.user.update({
         where: { id: user.id },
-        data: { avatarUrl: payload.picture },
+        data: { avatarUrl: picture },
       });
-      user.avatarUrl = payload.picture;
+      user.avatarUrl = picture;
     }
   }
 

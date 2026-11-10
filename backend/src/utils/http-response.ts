@@ -10,5 +10,6 @@ export const sendSuccess = <T>(
     success: true,
     message,
     data,
+    requestId: res.req.id,
   });
 };

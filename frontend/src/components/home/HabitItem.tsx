@@ -1,80 +1,118 @@
+import { memo, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { Check, Flame, Pencil, Trash2 } from 'lucide-react'
 import { useHabitStore, type Habit } from '../../store/habitStore'
 
 interface Props {
   habit: Habit;
-  index: number;
+  /** True while this item is playing its confirmed-delete exit. */
+  exiting?: boolean;
   onEdit: (habit: Habit) => void;
   onDelete: (habit: Habit) => void;
 }
 
-export const HabitItem = ({ habit, index, onEdit, onDelete }: Props) => {
-  const { completeHabit } = useHabitStore()
+export const HabitItem = memo(({ habit, exiting = false, onEdit, onDelete }: Props) => {
+  const completeHabit = useHabitStore((state) => state.completeHabit)
 
+  const handleComplete = useCallback(() => {
+    completeHabit(habit.id)
+  }, [completeHabit, habit.id])
+
+  const handleEdit = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation()
+    onEdit(habit)
+  }, [onEdit, habit])
+
+  const handleDelete = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation()
+    onDelete(habit)
+  }, [onDelete, habit])
+
+  // AUDIT FIX [5.2 & 5.3]: Keyboard accessibility and screen reader support for habit item
   return (
     <motion.div
-      className={`group relative flex items-center gap-3.5 sm:gap-4 p-3.5 sm:p-4 rounded-2xl transition-all duration-300 ${
+      className={`group relative flex items-center gap-3.5 sm:gap-4 p-3.5 sm:p-4 rounded-2xl transition-colors duration-300 ${
         habit.completedToday
-          ? 'bg-[#e6f9f4] shadow-[0_1px_8px_rgba(44,181,160,0.12)]'
-          : 'bg-white shadow-[0_1px_8px_rgba(0,0,0,0.05)]'
+          ? 'bg-done-bg shadow-[0_1px_8px_rgba(44,181,160,0.12)]'
+          : 'bg-surface shadow-[0_1px_8px_rgba(0,0,0,0.05)]'
       }`}
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 20 }}
-      transition={{ duration: 0.4, delay: 0.1 * index + 0.4 }}
       layout
+      initial={false}
+      animate={{ opacity: 1 }}
+      exit={{
+        opacity: 0,
+        scale: 0.96,
+        transition: exiting
+          ? { duration: 0.22, ease: 'easeIn' }
+          : { duration: 0 },
+      }}
     >
-      <div
-        className={`w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-xl shrink-0 cursor-pointer ${
-          habit.completedToday ? 'bg-[#d0f0e8]' : 'bg-[#f0f7f5]'
+      <button
+        type="button"
+        className={`w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-xl shrink-0 cursor-pointer transition-transform hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand ${
+          habit.completedToday ? 'bg-done-bg' : 'bg-well'
         }`}
-        onClick={() => completeHabit(habit.id)}
+        onClick={handleComplete}
+        aria-label={habit.completedToday ? `Mark ${habit.name} incomplete` : `Mark ${habit.name} complete`}
       >
         {habit.icon}
-      </div>
+      </button>
 
-      <div className="flex-1 min-w-0 cursor-pointer" onClick={() => completeHabit(habit.id)}>
+      <button
+        type="button"
+        className="flex-1 min-w-0 text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-lg p-0.5"
+        onClick={handleComplete}
+        aria-label={habit.completedToday ? `${habit.name}, completed today. Click to toggle.` : `${habit.name}. Click to complete.`}
+      >
         <h4 className={`text-[0.92rem] sm:text-[0.95rem] font-semibold leading-tight ${
-          habit.completedToday ? 'text-text-dark/60 line-through' : 'text-text-dark'
+          habit.completedToday ? 'text-ink/60 line-through' : 'text-ink'
         }`}>
           {habit.name}
         </h4>
         <div className="flex items-center gap-1 mt-1">
-          <Flame size={12} className="text-orange-400" />
-          <span className="text-[0.75rem] sm:text-[0.78rem] text-sf-teal font-semibold">
+          <Flame size={12} className="text-ember" />
+          <span className="text-[0.75rem] sm:text-[0.78rem] text-brand font-semibold">
             {habit.bestStreak} days
           </span>
         </div>
-      </div>
+      </button>
 
       <div className="flex items-center gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 shrink-0">
         <motion.button
-          className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-sf-teal/10 flex items-center justify-center text-sf-teal hover:bg-sf-teal/20 cursor-pointer transition-colors duration-200"
-          onClick={(e) => { e.stopPropagation(); onEdit(habit); }}
+          type="button"
+          className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-brand/10 flex items-center justify-center text-brand hover:bg-brand/20 cursor-pointer transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+          onClick={handleEdit}
           whileTap={{ scale: 0.9 }}
           title="Edit habit"
+          aria-label={`Edit ${habit.name}`}
         >
           <Pencil size={14} strokeWidth={2.2} />
         </motion.button>
         <motion.button
-          className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-red-50 flex items-center justify-center text-red-400 hover:bg-red-100 hover:text-red-500 cursor-pointer transition-colors duration-200"
-          onClick={(e) => { e.stopPropagation(); onDelete(habit); }}
+          type="button"
+          className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-danger-soft flex items-center justify-center text-danger-text hover:bg-danger-line hover:text-danger cursor-pointer transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+          onClick={handleDelete}
           whileTap={{ scale: 0.9 }}
           title="Delete habit"
+          aria-label={`Delete ${habit.name}`}
         >
           <Trash2 size={14} strokeWidth={2.2} />
         </motion.button>
       </div>
 
-      <div
-        className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-300 cursor-pointer ${
-          habit.completedToday ? 'bg-sf-teal border-sf-teal' : 'border-gray-200 bg-white hover:border-sf-teal/40'
+      <button
+        type="button"
+        className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-300 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand ${
+          habit.completedToday ? 'bg-brand border-brand' : 'border-line bg-surface hover:border-brand/40'
         }`}
-        onClick={() => completeHabit(habit.id)}
+        onClick={handleComplete}
+        aria-label={habit.completedToday ? `Mark ${habit.name} incomplete` : `Mark ${habit.name} complete`}
+        aria-pressed={habit.completedToday}
       >
-        {habit.completedToday && <Check size={16} className="text-white" strokeWidth={3} />}
-      </div>
+        {habit.completedToday && <Check size={16} className="text-on-brand" strokeWidth={3} />}
+      </button>
     </motion.div>
   )
-}
+})
+
+HabitItem.displayName = 'HabitItem'

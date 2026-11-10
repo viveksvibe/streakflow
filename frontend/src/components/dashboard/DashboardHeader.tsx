@@ -1,21 +1,19 @@
-import { motion } from "framer-motion";
+import { memo } from "react";
 import type { DashboardUser } from "../../store/statStore";
 
 interface Props {
   user: DashboardUser;
 }
 
-export const DashboardHeader = ({ user }: Props) => (
-  <motion.div
-    className="pt-10"
-    initial={{ opacity: 0, y: -10 }}
-    animate={{ opacity: 1, y: 0 }}
-  >
-    <h1 className="text-2xl font-bold text-gray-800">
-      Your Progress 📊
+export const DashboardHeader = memo(({ user }: Props) => (
+  <div className="pt-10">
+    <h1 className="font-display text-[1.5rem] sm:text-2xl font-bold text-ink">
+      Your Progress
     </h1>
-    <p className="text-sm text-gray-500 mt-1">
+    <p className="text-[0.85rem] sm:text-sm text-ink-mute mt-1">
       Keep going, {user.fullName}
     </p>
-  </motion.div>
-);
+  </div>
+));
+
+DashboardHeader.displayName = 'DashboardHeader';

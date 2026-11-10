@@ -1,3 +1,4 @@
+// AUDIT FIX [7.3]: Fix AppError prototype inheritance across transpilation targets
 export class AppError extends Error {
   public readonly statusCode: number;
   public readonly details?: unknown;
@@ -7,5 +8,7 @@ export class AppError extends Error {
     this.name = "AppError";
     this.statusCode = statusCode;
     this.details = details;
+    Object.setPrototypeOf(this, new.target.prototype);
   }
 }
+
