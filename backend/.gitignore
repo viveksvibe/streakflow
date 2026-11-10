@@ -7,6 +7,7 @@ dist/
 .env
 .env.*
 !.env.example
+*.bak
 
 # Prisma
 # (migrations are committed on purpose; only the local SQLite-style dev db would be ignored)
@@ -16,6 +17,9 @@ prisma/*.db-journal
 # Logs & caches
 *.log
 *.tsbuildinfo
+
+# Debug scripts
+test-*.ts
 
 # WSL artifacts
 *Zone.Identifier*
