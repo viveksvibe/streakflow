@@ -27,8 +27,6 @@ model User {
   refreshTokens       RefreshToken[]
   completions         HabitCompletion[]
   freezeUsages        StreakFreezeUsage[]
-
-  @@map("users")
 }
 
 model RefreshToken {
@@ -42,7 +40,6 @@ model RefreshToken {
 
   @@index([userId])
   @@index([expiresAt])
-  @@map("refresh_tokens")
 }
 
 model Habit {
@@ -61,7 +58,6 @@ model Habit {
   freezeUsages    StreakFreezeUsage[]
 
   @@index([userId, status])
-  @@map("habits")
 }
 
 model HabitCompletion {
@@ -76,7 +72,6 @@ model HabitCompletion {
 
   @@unique([habitId, localDate])
   @@index([userId, localDate])
-  @@map("habit_completions")
 }
 
 model HabitProgress {
@@ -86,8 +81,6 @@ model HabitProgress {
   lastCompletedDate String?
   updatedAt         DateTime @updatedAt
   habit             Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
-
-  @@map("habit_progress")
 }
 
 model StreakFreezeUsage {
@@ -101,5 +94,4 @@ model StreakFreezeUsage {
 
   @@index([userId, missedLocalDate])
   @@index([habitId, missedLocalDate])
-  @@map("streak_freeze_usages")
 }
