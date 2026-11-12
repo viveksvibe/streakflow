@@ -19,6 +19,10 @@
 # PORT                 Port the backend listens on (e.g. 3000)
 # NODE_ENV             Environment (production)
 #
+# NOTE: the app reads JWT_ACCESS_SECRET / JWT_REFRESH_SECRET from the
+# container environment, so the GitHub secrets JWT_SECRET and
+# JWT_REFRESH_SECRET are mapped to those names in docker-compose.yml below.
+#
 # No VITE_* secrets are needed here — the frontend is built & deployed
 # independently on Cloudflare Pages.
 # =============================================================================
@@ -97,7 +101,7 @@ jobs:
       EC2_PORT: ${{ secrets.EC2_SSH_PORT }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      IMAGE_NAME: ${{ env.IMAGE_NAME }}
+      IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/streakflow-backend
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       JWT_REFRESH_SECRET: ${{ secrets.JWT_REFRESH_SECRET }}
@@ -148,7 +152,7 @@ jobs:
               restart: unless-stopped
               environment:
                 - DATABASE_URL=${DATABASE_URL}
-                - JWT_SECRET=${JWT_SECRET}
+                - JWT_ACCESS_SECRET=${JWT_SECRET}
                 - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
                 - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
                 - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
