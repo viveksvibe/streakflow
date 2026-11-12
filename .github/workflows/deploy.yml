@@ -101,7 +101,7 @@ jobs:
       EC2_PORT: ${{ secrets.EC2_SSH_PORT }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/streakflow-backend
+      IMAGE_NAME: ${{ env.IMAGE_NAME }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       JWT_REFRESH_SECRET: ${{ secrets.JWT_REFRESH_SECRET }}
@@ -144,7 +144,6 @@ jobs:
           # Write docker-compose.yml (unquoted heredoc so ${VAR} is expanded
           # from the shell environment exported above)
           cat > docker-compose.yml << COMPOSE_EOF
-          version: '3.8'
           services:
             backend:
               image: ${IMAGE_NAME}:latest
@@ -169,8 +168,9 @@ jobs:
               driver: bridge
           COMPOSE_EOF
 
-          # Deploy (interactive=false so Compose does not consume stdin)
-          docker compose up -d --remove-orphans --interactive=false
+          # Deploy (-y answers prompts non-interactively so Compose does not
+          # consume stdin and silently skip later commands)
+          docker compose up -d --remove-orphans -y
 
           # Prune old images
           docker image prune -f
