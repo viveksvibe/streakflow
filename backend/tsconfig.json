@@ -13,7 +13,8 @@
       "node"
     ],
     "ignoreDeprecations": "6.0",
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true
   },
   "include": [
     "src/**/*"
