@@ -18,7 +18,7 @@ export const createTestUser = async (overrides = {}) => {
   });
 };
 
-export const createTestHabit = async (userId: string, overrides = {}) => {
+export const createTestHabit = async (userId, overrides = {}) => {
   const defaultHabit = {
     userId,
     name: 'Test Habit',
@@ -52,8 +52,8 @@ export const createTestHabit = async (userId: string, overrides = {}) => {
  * waiting for real days to pass.
  */
 export const setHabitProgress = async (
-  habitId: string,
-  progress: { currentStreak?: number; bestStreak?: number; lastCompletedDate?: string | null },
+  habitId,
+  progress,
 ) => {
   return prisma.habitProgress.update({
     where: { habitId },
@@ -62,7 +62,7 @@ export const setHabitProgress = async (
 };
 
 /** Date string (YYYY-MM-DD) N days before today in the given timezone. */
-export const daysAgo = (count: number, timezone = 'UTC') =>
+export const daysAgo = (count, timezone = 'UTC') =>
   addDaysToLocalDate(getTodayLocalDate(timezone), -count);
 
 export const cleanupTestData = async () => {
