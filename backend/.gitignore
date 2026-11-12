@@ -18,8 +18,8 @@ prisma/*.db-journal
 *.log
 *.tsbuildinfo
 
-# Debug scripts
-test-*.ts
+# Debug scripts (root of backend only; not test fixtures under src/)
+/test-*.ts
 
 # WSL artifacts
 *Zone.Identifier*
