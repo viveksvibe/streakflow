@@ -50,7 +50,7 @@ export const AddHabitModal = memo(({ isOpen, onClose }: Props) => {
       <button
         key={emoji}
         type="button"
-        className={`w-10 h-10 rounded-xl text-lg flex items-center justify-center cursor-pointer transition-all duration-200 ${
+        className={`w-9 h-9 rounded-xl text-base flex items-center justify-center cursor-pointer transition-all duration-200 ${
           icon === emoji
             ? 'bg-brand/15 ring-2 ring-brand scale-110'
             : 'bg-well hover:bg-line'
@@ -82,16 +82,16 @@ export const AddHabitModal = memo(({ isOpen, onClose }: Props) => {
               {/* AUDIT FIX [5.3]: Accessible label for modal close button */}
               <button
                 type="button"
-                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-well flex items-center justify-center text-ink-mute hover:bg-line hover:text-ink transition-colors cursor-pointer"
+                className="absolute top-4 right-4 w-7 h-7 rounded-full bg-well flex items-center justify-center text-ink-mute hover:bg-line hover:text-ink transition-colors cursor-pointer"
                 onClick={onClose}
                 aria-label="Close dialog"
               >
-                <X size={16} />
+                <X size={15} />
               </button>
 
-              <h3 className="text-lg font-bold text-ink mb-5">New Habit</h3>
+              <h3 className="text-[1.1rem] font-bold text-ink mb-5">New Habit</h3>
 
-              <label className="text-[0.82rem] font-medium text-ink-mid mb-1.5 block">
+              <label className="text-[0.78rem] font-medium text-ink-mid mb-1.5 block">
                 Habit Name
               </label>
               <input
@@ -99,12 +99,12 @@ export const AddHabitModal = memo(({ isOpen, onClose }: Props) => {
                 value={name}
                 onChange={handleNameChange}
                 placeholder="e.g. Morning Yoga"
-                className="w-full h-12 px-4 rounded-xl border border-line bg-well text-ink text-[0.92rem] font-medium outline-none transition-all duration-200 focus:border-brand-ring focus:ring-2 focus:ring-brand-ring/20 placeholder:text-ink-mute"
+                className="w-full h-11 px-4 rounded-xl border border-line bg-well text-ink text-[0.88rem] font-medium outline-none transition-all duration-200 focus:border-brand-ring focus:ring-2 focus:ring-brand-ring/20 placeholder:text-ink-mute"
                 autoFocus
                 onKeyDown={handleKeyDown}
               />
 
-              <label className="text-[0.82rem] font-medium text-ink-mid mt-4 mb-2 block">
+              <label className="text-[0.78rem] font-medium text-ink-mid mt-4 mb-2 block">
                 Choose an Icon
               </label>
               <div className="flex flex-wrap gap-2">
@@ -113,20 +113,20 @@ export const AddHabitModal = memo(({ isOpen, onClose }: Props) => {
 
               <div className="mt-4">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-[0.82rem] font-medium text-ink-mid flex items-center gap-1.5">
-                    <Clock size={14} className="text-brand" />
+                  <label className="text-[0.78rem] font-medium text-ink-mid flex items-center gap-1.5">
+                    <Clock size={13} className="text-brand" />
                     Schedule Reminder
                   </label>
                   <button
                     type="button"
-                    className={`relative w-11 h-6 rounded-full transition-colors duration-300 cursor-pointer ${
+                    className={`relative w-10 h-5.5 rounded-full transition-colors duration-300 cursor-pointer ${
                       scheduleEnabled ? 'bg-brand' : 'bg-line'
                     }`}
                     onClick={toggleSchedule}
                   >
                     <span
-                      className={`absolute top-0.5 left-0.5 w-5 h-5 bg-surface rounded-full shadow-md transition-transform duration-300 ${
-                        scheduleEnabled ? 'translate-x-5' : 'translate-x-0'
+                      className={`absolute top-0.5 left-0.5 w-4.5 h-4.5 bg-surface rounded-full shadow-md transition-transform duration-300 ${
+                        scheduleEnabled ? 'translate-x-4.5' : 'translate-x-0'
                       }`}
                     />
                   </button>
@@ -147,12 +147,12 @@ export const AddHabitModal = memo(({ isOpen, onClose }: Props) => {
               </div>
 
               <motion.button
-                className="w-full h-12 mt-6 bg-ink text-on-brand rounded-xl text-[0.92rem] font-semibold flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.2)] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full h-11 mt-6 bg-ink text-on-brand rounded-xl text-[0.88rem] font-semibold flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.2)] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed"
                 onClick={handleAdd}
                 disabled={!name.trim()}
                 whileTap={{ scale: 0.97 }}
               >
-                <Plus size={18} />
+                <Plus size={17} />
                 Add Habit
               </motion.button>
             </motion.div>

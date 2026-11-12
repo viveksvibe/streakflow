@@ -4,7 +4,6 @@ import { prisma } from "../../lib/prisma.js";
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../../utils/jwt.js";
 import { comparePassword, hashPassword } from "../../utils/password.js";
 import { hashToken } from "../../utils/token.js";
-import { env } from "../../config/env.js";
 import crypto from "crypto";
 
 type DbClient = PrismaClient | Prisma.TransactionClient;

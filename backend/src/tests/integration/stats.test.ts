@@ -8,7 +8,7 @@ const uniqueEmail = (prefix: string) =>
 
 describe('Stats Integration Tests', () => {
   let authToken: string;
-  let userId: string;
+  let _userId: string;
 
   const createHabit = (body: Record<string, unknown>) =>
     request(app)
@@ -37,7 +37,7 @@ describe('Stats Integration Tests', () => {
       });
 
     authToken = registerResponse.body.data.tokens.accessToken;
-    userId = registerResponse.body.data.user.id;
+    _userId = registerResponse.body.data.user.id;
   });
 
   describe('GET /api/v1/stats/dashboard', () => {

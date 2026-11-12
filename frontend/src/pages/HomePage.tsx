@@ -66,8 +66,8 @@ const HomePage = () => {
         />
 
         <div className="mt-7 sm:mt-8 mb-3 flex items-center justify-between">
-          <h3 className="text-[1.1rem] sm:text-lg font-bold text-ink">Today's Habits</h3>
-          <span className="text-[0.82rem] sm:text-sm text-ink-mute font-medium">
+          <h3 className="text-[1rem] sm:text-[1.1rem] font-bold text-ink">Today's Habits</h3>
+          <span className="text-[0.78rem] sm:text-[0.82rem] text-ink-mute font-medium">
             {completedCount}/{totalCount} done
           </span>
         </div>
@@ -88,11 +88,11 @@ const HomePage = () => {
       </div>
 
       <motion.button
-        className="fixed bottom-6 right-5 sm:right-6 h-12 px-5 bg-brand text-on-brand rounded-full text-sm font-semibold flex items-center gap-2 shadow-[0_4px_20px_rgba(26,138,125,0.35)] cursor-pointer z-30 hover:shadow-[0_6px_28px_rgba(26,138,125,0.45)] active:scale-95 transition-shadow duration-300"
+        className="fixed bottom-6 right-5 sm:right-6 h-11 px-4.5 bg-brand text-on-brand rounded-full text-[0.88rem] font-semibold flex items-center gap-2 shadow-[0_4px_20px_rgba(26,138,125,0.35)] cursor-pointer z-30 hover:shadow-[0_6px_28px_rgba(26,138,125,0.45)] active:scale-95 transition-shadow duration-300"
         onClick={openAddModal}
         whileTap={{ scale: 0.93 }}
       >
-        <Plus size={18} strokeWidth={2.5} />
+        <Plus size={17} strokeWidth={2.5} />
         Add Habit
       </motion.button>
 

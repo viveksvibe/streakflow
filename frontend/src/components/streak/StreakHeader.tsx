@@ -18,11 +18,11 @@ export const StreakHeader = memo(({ habit, totalHabits, onPrev, onNext }: Props)
       {totalHabits > 1 ? (
         <button
           onClick={onPrev}
-          className="w-10 h-10 rounded-full bg-ink/10 flex items-center justify-center text-on-brand hover:bg-ink/20 transition-colors cursor-pointer"
+          className="w-9 h-9 rounded-full bg-ink/10 flex items-center justify-center text-on-brand hover:bg-ink/20 transition-colors cursor-pointer"
         >
-          <ChevronLeft size={24} />
+          <ChevronLeft size={22} />
         </button>
-      ) : <div className="w-10" />}
+      ) : <div className="w-9" />}
 
       <motion.div
         key={habit?.id}
@@ -31,15 +31,15 @@ export const StreakHeader = memo(({ habit, totalHabits, onPrev, onNext }: Props)
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.3 }}
       >
-        <div className="w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-2xl bg-ink/10 flex items-center justify-center text-3xl sm:text-[2rem] mb-3">
+        <div className="w-14 h-14 sm:w-[64px] sm:h-[64px] rounded-2xl bg-ink/10 flex items-center justify-center text-2xl sm:text-[1.8rem] mb-3">
           {habit?.icon || '🎯'}
         </div>
-        <h1 className="text-xl sm:text-[1.4rem] font-display font-bold text-on-brand tracking-tight">
+        <h1 className="text-[1.15rem] sm:text-[1.3rem] font-display font-bold text-on-brand tracking-tight">
           {habit?.name || 'My Habit'}
         </h1>
         <div className="flex items-center gap-1.5 mt-2">
-          <Clock size={14} className="text-on-brand/70" />
-          <p className="text-[0.82rem] sm:text-sm text-on-brand/75 font-medium">
+          <Clock size={13} className="text-on-brand/70" />
+          <p className="text-[0.78rem] sm:text-[0.82rem] text-on-brand/75 font-medium">
             {habit?.reminderTime
               ? `Scheduled at ${habit.reminderTime}`
               : 'No schedule set'}
@@ -50,11 +50,11 @@ export const StreakHeader = memo(({ habit, totalHabits, onPrev, onNext }: Props)
       {totalHabits > 1 ? (
         <button
           onClick={onNext}
-          className="w-10 h-10 rounded-full bg-ink/10 flex items-center justify-center text-on-brand hover:bg-ink/20 transition-colors cursor-pointer"
+          className="w-9 h-9 rounded-full bg-ink/10 flex items-center justify-center text-on-brand hover:bg-ink/20 transition-colors cursor-pointer"
         >
-          <ChevronRight size={24} />
+          <ChevronRight size={22} />
         </button>
-      ) : <div className="w-10" />}
+      ) : <div className="w-9" />}
     </div>
   </div>
 ));

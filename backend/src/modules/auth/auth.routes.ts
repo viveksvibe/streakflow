@@ -3,7 +3,7 @@ import { authenticate } from "../../middlewares/authenticate.js";
 import { validateRequest } from "../../middlewares/validate-request.js";
 import { authRateLimit } from "../../middlewares/rate-limit.js";
 import { login, logout, me, refresh, register, updateMe, googleLogin } from "./auth.controller.js";
-import { loginSchema, logoutSchema, registerSchema, googleLoginSchema, updateProfileSchema } from "./auth.schemas.js";
+import { loginSchema, registerSchema, googleLoginSchema, updateProfileSchema } from "./auth.schemas.js";
 import { upload } from "../../middlewares/upload.js";
 
 export const authRouter = Router();

@@ -16,7 +16,7 @@ export const DailyGoalCard = memo(({ completedCount, totalCount, percentage, lon
 
   return (
     <div className="mt-5 sm:mt-6 bg-surface border border-line rounded-2xl p-5 sm:p-6 flex items-center gap-5 sm:gap-6 shadow-[var(--sf-card-shadow)]">
-      <div className="relative w-[120px] h-[120px] sm:w-[130px] sm:h-[130px] shrink-0">
+      <div className="relative w-[110px] h-[110px] sm:w-[120px] sm:h-[120px] shrink-0">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
           <circle cx="60" cy="60" r={radius} fill="none" stroke="var(--sf-well)" strokeWidth="10" />
           <motion.circle
@@ -28,21 +28,21 @@ export const DailyGoalCard = memo(({ completedCount, totalCount, percentage, lon
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-[1.65rem] sm:text-[1.85rem] font-extrabold text-ink leading-none">
+          <span className="text-[1.5rem] sm:text-[1.7rem] font-extrabold text-ink leading-none">
             {percentage}%
           </span>
-          <span className="text-[0.7rem] text-ink-mute mt-0.5">complete</span>
+          <span className="text-[0.68rem] text-ink-mute mt-0.5">complete</span>
         </div>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <h2 className="font-display text-[1.05rem] sm:text-lg font-bold text-ink">Daily Goal</h2>
-        <p className="text-[0.82rem] sm:text-sm text-ink-mute">
+        <h2 className="font-display text-[0.95rem] sm:text-[1.05rem] font-bold text-ink">Daily Goal</h2>
+        <p className="text-[0.78rem] sm:text-[0.82rem] text-ink-mute">
           {completedCount} of {totalCount} habits done today
         </p>
         <div className="flex items-center gap-1.5 mt-1">
-          <Flame size={15} className="text-ember" />
-          <span className="text-[0.82rem] sm:text-sm font-semibold text-ink">
+          <Flame size={14} className="text-ember" />
+          <span className="text-[0.78rem] sm:text-[0.82rem] font-semibold text-ink">
             {longestStreak} day streak
           </span>
         </div>

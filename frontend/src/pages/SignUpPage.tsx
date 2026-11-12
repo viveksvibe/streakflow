@@ -65,13 +65,13 @@ const SignUpPage = () => {
   }
 
   const inputWrapperClass =
-    'flex items-center gap-2.5 rounded-[12px] border border-line bg-well px-3.5 h-12 transition-colors duration-200 focus-within:border-brand-ring focus-within:ring-2 focus-within:ring-brand-ring/30'
+    'flex items-center gap-2.5 rounded-[12px] border border-line bg-well px-3.5 h-10 transition-colors duration-200 focus-within:border-brand-ring focus-within:ring-2 focus-within:ring-brand-ring/30'
 
   const inputClass =
-    'flex-1 bg-transparent border-none outline-none text-ink text-[0.95rem] font-medium h-full placeholder:text-ink-mute'
+    'flex-1 bg-transparent border-none outline-none text-ink text-[0.85rem] font-medium h-full placeholder:text-ink-mute'
 
   const labelClass =
-    'text-[13px] font-medium text-ink-mute'
+    'text-[0.78rem] font-medium text-ink-mute'
 
   return (
     <div className="relative flex min-h-[100dvh] flex-col items-center justify-center bg-page px-5 py-8 sm:px-6 sm:py-10">
@@ -81,23 +81,23 @@ const SignUpPage = () => {
       </div>
 
       {/* Logo */}
-      <div className="mb-8 relative z-10">
+      <div className="mb-6 relative z-10">
         <Logo size="md" />
       </div>
 
       {/* Heading */}
-      <div className="mb-7 text-center relative z-10">
-        <h1 className="font-display text-[30px] font-semibold tracking-[-0.02em] text-ink">
+      <div className="mb-6 text-center relative z-10">
+        <h1 className="font-display text-[1.5rem] font-semibold tracking-[-0.02em] text-ink">
           Start your first streak
         </h1>
-        <p className="mt-2 text-[15px] text-ink-mid">
+        <p className="mt-1.5 text-[0.85rem] text-ink-mid">
           Free forever. Your first freeze is waiting.
         </p>
       </div>
 
       {/* Form Card */}
       <form
-        className="relative z-10 flex w-full max-w-[420px] flex-col gap-4 rounded-3xl border border-line bg-surface p-6 shadow-[var(--sf-card-shadow)] sm:p-7"
+        className="relative z-10 flex w-full max-w-[420px] flex-col gap-4 rounded-3xl border border-line bg-surface p-5 shadow-[var(--sf-card-shadow)] sm:p-6"
         onSubmit={handleSubmit}
       >
         {/* Auth error, announced to screen readers and visible in DOM order */}
@@ -105,7 +105,7 @@ const SignUpPage = () => {
           <p
             role="alert"
             id="signup-error"
-            className="rounded-[10px] bg-danger-soft border border-danger-line px-3.5 py-2.5 text-[13.5px] font-medium leading-snug text-danger-text"
+            className="rounded-[10px] bg-danger-soft border border-danger-line px-3.5 py-2.5 text-[0.8rem] font-medium leading-snug text-danger-text"
           >
             {formError}
           </p>
@@ -136,7 +136,7 @@ const SignUpPage = () => {
             Email
           </label>
           <div className={inputWrapperClass}>
-            <Mail className="shrink-0 text-ink-mute" size={17} />
+            <Mail className="shrink-0 text-ink-mute" size={16} />
             <input
               id="email"
               name="email"
@@ -156,7 +156,7 @@ const SignUpPage = () => {
             Password
           </label>
           <div className={inputWrapperClass}>
-            <Lock className="shrink-0 text-ink-mute" size={17} />
+            <Lock className="shrink-0 text-ink-mute" size={16} />
             <input
               id="password"
               name="password"
@@ -173,7 +173,7 @@ const SignUpPage = () => {
               onClick={() => setShowPassword(!showPassword)}
               aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
-              {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
         </div>
@@ -188,7 +188,7 @@ const SignUpPage = () => {
               ? `${inputWrapperClass} border-ember`
               : inputWrapperClass
           }>
-            <Lock className="shrink-0 text-ink-mute" size={17} />
+            <Lock className="shrink-0 text-ink-mute" size={16} />
             <input
               id="confirmPassword"
               name="confirmPassword"
@@ -208,11 +208,11 @@ const SignUpPage = () => {
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
             >
-              {showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+              {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
           {matchError && (
-            <p id="confirm-error" role="alert" className="text-[13px] font-medium text-danger-text">
+            <p id="confirm-error" role="alert" className="text-[0.78rem] font-medium text-danger-text">
               Passwords don't match.
             </p>
           )}
@@ -228,7 +228,7 @@ const SignUpPage = () => {
             onChange={() => setAgreed(!agreed)}
           />
           {/* AUDIT FIX [9.2]: Link to dedicated Terms and Privacy routes */}
-          <span className="text-[13px] leading-snug text-ink-mid">
+          <span className="text-[0.78rem] leading-snug text-ink-mid">
             I agree to the{' '}
             <Link
               to="/terms"
@@ -258,7 +258,7 @@ const SignUpPage = () => {
           whileTap={isLoading || !agreed ? undefined : { scale: 0.99 }}
         >
           {isLoading ? (
-            <Loader2 className="animate-spin" size={18} />
+            <Loader2 className="animate-spin" size={17} />
           ) : (
             'Create account'
           )}
@@ -266,23 +266,23 @@ const SignUpPage = () => {
 
         <div className="flex items-center gap-3">
           <hr className="flex-1 border-t border-line" />
-          <span className="text-[12.5px] text-ink-mute">or</span>
+          <span className="text-[0.75rem] text-ink-mute">or</span>
           <hr className="flex-1 border-t border-line" />
         </div>
 
         <motion.button
           type="button"
           onClick={() => googleLoginAction()}
-          className="btn-swap flex h-12 w-full cursor-pointer items-center justify-center gap-3 rounded-[12px] text-[15px] font-semibold"
+          className="btn-swap flex h-10 w-full cursor-pointer items-center justify-center gap-3 rounded-[12px] text-[0.85rem] font-semibold"
           whileTap={{ scale: 0.99 }}
         >
-          <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="" aria-hidden="true" className="h-5 w-5" />
+          <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="" aria-hidden="true" className="h-4.5 w-4.5" />
           Continue with Google
         </motion.button>
       </form>
 
       {/* Sign In Link */}
-      <p className="mt-6 text-[14.5px] text-ink-mid relative z-10">
+      <p className="mt-5 text-[0.85rem] text-ink-mid relative z-10">
         Already keeping streaks?{' '}
         <button
           type="button"

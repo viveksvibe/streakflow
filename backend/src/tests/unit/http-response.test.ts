@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 import { sendSuccess } from '../../utils/http-response.js';
 
 const createMockRes = (requestId = 'req-1') => {

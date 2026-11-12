@@ -268,7 +268,6 @@ export const completeHabitForToday = async (userId: string, habitId: string) => 
 
     const existingProgress = habit.progress;
     let nextCurrentStreak = 1;
-    let nextBestStreak = Math.max(existingProgress?.bestStreak ?? 0, 1);
     let consumedFreeze = false;
     let remainingFreezes = habit.user.streakFreezeCredits;
 
@@ -303,7 +302,7 @@ export const completeHabitForToday = async (userId: string, habitId: string) => 
       }
     }
 
-    nextBestStreak = Math.max(existingProgress?.bestStreak ?? 0, nextCurrentStreak);
+    const nextBestStreak = Math.max(existingProgress?.bestStreak ?? 0, nextCurrentStreak);
 
     await tx.habitProgress.upsert({
       where: { habitId },

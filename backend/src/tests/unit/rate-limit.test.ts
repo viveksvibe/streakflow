@@ -1,10 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import express from 'express';
 import request from 'supertest';
-import type { NextFunction, Request, Response } from 'express';
 import { rateLimit } from '../../middlewares/rate-limit.js';
-
-const noop = (_req: Request, _res: Response, next: NextFunction) => next();
 
 const buildApp = (limiter: ReturnType<typeof rateLimit>) => {
   const app = express();

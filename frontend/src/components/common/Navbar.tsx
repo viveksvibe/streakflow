@@ -100,17 +100,17 @@ const Navbar = memo(() => {
         id="main-navbar"
       >
         <div className="max-w-6xl mx-auto px-5 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-[68px]">
+          <div className="flex items-center justify-between h-14 sm:h-[64px]">
             {/* Logo */}
             <div
               className="cursor-pointer shrink-0"
               onClick={() => navigateTo(ROUTES.HOME)}
             >
               <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-[10px] bg-gradient-to-br from-sf-teal to-sf-teal-dark flex items-center justify-center text-on-brand shadow-[0_2px_10px_rgba(44,181,160,0.35)]">
-                  <Flame size={20} strokeWidth={2.2} />
+                <div className="w-8 h-8 rounded-[10px] bg-gradient-to-br from-sf-teal to-sf-teal-dark flex items-center justify-center text-on-brand shadow-[0_2px_10px_rgba(44,181,160,0.35)]">
+                  <Flame size={18} strokeWidth={2.2} />
                 </div>
-                <span className="text-lg font-bold text-ink tracking-tight">
+                <span className="text-[1rem] font-bold text-ink tracking-tight">
                   Streak<span className="text-brand">Flow</span>
                 </span>
               </div>
@@ -122,7 +122,7 @@ const Navbar = memo(() => {
                 <button
                   key={link.path}
                   onClick={() => navigateTo(link.path)}
-                  className={`relative px-4 py-2 rounded-xl text-[0.88rem] font-semibold flex items-center gap-2 cursor-pointer transition-all duration-300 ${
+                  className={`relative px-4 py-2 rounded-xl text-[0.82rem] font-semibold flex items-center gap-2 cursor-pointer transition-all duration-300 ${
                     isActive(link.path)
                       ? 'text-brand'
                       : 'text-ink-mid hover:text-ink hover:bg-ink/[0.04]'
@@ -160,21 +160,21 @@ const Navbar = memo(() => {
                   }`}
                   id="nav-profile-btn"
                 >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-sf-teal-light to-sf-teal flex items-center justify-center text-on-brand text-sm font-bold overflow-hidden shadow-[0_2px_8px_rgba(44,181,160,0.3)] shrink-0">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-sf-teal-light to-sf-teal flex items-center justify-center text-on-brand text-xs font-bold overflow-hidden shadow-[0_2px_8px_rgba(44,181,160,0.3)] shrink-0">
                     {user?.avatarUrl ? (
                       <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                     ) : (
                       userInitial
                     )}
                   </div>
-                  <span className="text-[0.85rem] font-semibold text-ink max-w-[120px] truncate">
+                  <span className="text-[0.8rem] font-semibold text-ink max-w-[120px] truncate">
                     {user?.fullName || 'User'}
                   </span>
                   <motion.div
                     animate={{ rotate: profileOpen ? 180 : 0 }}
                     transition={{ duration: 0.25 }}
                   >
-                    <ChevronDown size={14} className="text-ink-mid" />
+                    <ChevronDown size={13} className="text-ink-mid" />
                   </motion.div>
                 </button>
 
@@ -190,10 +190,10 @@ const Navbar = memo(() => {
                     >
                       {/* User info */}
                       <div className="px-4 py-3.5 border-b border-line">
-                        <p className="text-[0.88rem] font-bold text-ink truncate">
+                        <p className="text-[0.82rem] font-bold text-ink truncate">
                           {user?.fullName}
                         </p>
-                        <p className="text-[0.75rem] text-ink-mute truncate mt-0.5">
+                        <p className="text-[0.72rem] text-ink-mute truncate mt-0.5">
                           {user?.email}
                         </p>
                       </div>
@@ -201,20 +201,20 @@ const Navbar = memo(() => {
                       {/* Menu items */}
                       <div className="py-1.5">
                         <button
-                          className="w-full px-4 py-2.5 flex items-center gap-3 text-[0.85rem] font-medium text-ink-mid hover:bg-well hover:text-ink cursor-pointer transition-colors duration-200"
+                          className="w-full px-4 py-2.5 flex items-center gap-3 text-[0.8rem] font-medium text-ink-mid hover:bg-well hover:text-ink cursor-pointer transition-colors duration-200"
                           onClick={() => navigateTo(ROUTES.PROFILE)}
                           id="nav-dropdown-profile"
                         >
-                          <User size={16} />
+                          <User size={15} />
                           Profile
                         </button>
                         <button
-                          className="w-full px-4 py-2.5 flex items-center gap-3 text-[0.85rem] font-medium text-danger-text hover:bg-danger-soft hover:text-danger cursor-pointer transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full px-4 py-2.5 flex items-center gap-3 text-[0.8rem] font-medium text-danger-text hover:bg-danger-soft hover:text-danger cursor-pointer transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                           onClick={handleLogout}
                           disabled={isLoading}
                           id="nav-dropdown-logout"
                         >
-                          {isLoading ? <Loader2 size={16} className="animate-spin" /> : <LogOut size={16} />}
+                          {isLoading ? <Loader2 size={15} className="animate-spin" /> : <LogOut size={15} />}
                           {isLoading ? 'Signing out...' : 'Sign Out'}
                         </button>
                       </div>
@@ -225,7 +225,7 @@ const Navbar = memo(() => {
 
               {/* Mobile hamburger */}
               <button
-                className="md:hidden w-10 h-10 rounded-xl flex items-center justify-center text-ink hover:bg-ink/[0.04] cursor-pointer transition-colors duration-200"
+                className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center text-ink hover:bg-ink/[0.04] cursor-pointer transition-colors duration-200"
                 onClick={toggleMobile}
                 id="nav-mobile-toggle"
               >
@@ -238,7 +238,7 @@ const Navbar = memo(() => {
                       exit={{ rotate: 90, opacity: 0 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <X size={22} />
+                      <X size={20} />
                     </motion.div>
                   ) : (
                     <motion.div
@@ -248,7 +248,7 @@ const Navbar = memo(() => {
                       exit={{ rotate: -90, opacity: 0 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <Menu size={22} />
+                      <Menu size={20} />
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -282,7 +282,7 @@ const Navbar = memo(() => {
               {/* Drawer header */}
               <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-line">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sf-teal-light to-sf-teal flex items-center justify-center text-on-brand text-lg font-bold overflow-hidden shadow-[0_2px_8px_rgba(44,181,160,0.3)] shrink-0">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sf-teal-light to-sf-teal flex items-center justify-center text-on-brand text-sm font-bold overflow-hidden shadow-[0_2px_8px_rgba(44,181,160,0.3)] shrink-0">
                     {user?.avatarUrl ? (
                       <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                     ) : (
@@ -290,10 +290,10 @@ const Navbar = memo(() => {
                     )}
                   </div>
                   <div>
-                    <p className="text-[0.9rem] font-bold text-ink truncate max-w-[160px]">
+                    <p className="text-[0.85rem] font-bold text-ink truncate max-w-[160px]">
                       {user?.fullName || 'User'}
                     </p>
-                    <p className="text-[0.72rem] text-ink-mute truncate max-w-[160px]">
+                    <p className="text-[0.7rem] text-ink-mute truncate max-w-[160px]">
                       {user?.email}
                     </p>
                   </div>
@@ -302,7 +302,7 @@ const Navbar = memo(() => {
                   className="w-8 h-8 rounded-lg flex items-center justify-center text-ink-mid hover:bg-well cursor-pointer transition-colors"
                   onClick={closeMobile}
                 >
-                  <X size={18} />
+                  <X size={17} />
                 </button>
               </div>
 
@@ -312,7 +312,7 @@ const Navbar = memo(() => {
                   <motion.button
                     key={link.path}
                     onClick={() => navigateTo(link.path)}
-                    className={`w-full px-4 py-3 rounded-xl text-[0.92rem] font-semibold flex items-center gap-3 cursor-pointer transition-all duration-300 ${
+                    className={`w-full px-4 py-3 rounded-xl text-[0.88rem] font-semibold flex items-center gap-3 cursor-pointer transition-all duration-300 ${
                       isActive(link.path)
                         ? 'text-brand bg-brand/8'
                         : 'text-ink-mid hover:text-ink hover:bg-well'
@@ -333,7 +333,7 @@ const Navbar = memo(() => {
                 {/* Profile Link */}
                 <motion.button
                   onClick={() => navigateTo(ROUTES.PROFILE)}
-                  className={`w-full px-4 py-3 rounded-xl text-[0.92rem] font-semibold flex items-center gap-3 cursor-pointer transition-all duration-300 ${
+                  className={`w-full px-4 py-3 rounded-xl text-[0.88rem] font-semibold flex items-center gap-3 cursor-pointer transition-all duration-300 ${
                     isActive(ROUTES.PROFILE)
                       ? 'text-brand bg-brand/8'
                       : 'text-ink-mid hover:text-ink hover:bg-well'
@@ -343,7 +343,7 @@ const Navbar = memo(() => {
                   transition={{ duration: 0.3, delay: navLinks.length * 0.06 }}
                   id="nav-mobile-profile"
                 >
-                  <User size={18} />
+                  <User size={17} />
                   Profile
                   {isActive(ROUTES.PROFILE) && (
                     <div className="ml-auto w-2 h-2 rounded-full bg-brand" />
@@ -352,7 +352,7 @@ const Navbar = memo(() => {
 
                 {/* Theme toggle row in mobile drawer */}
                 <div className="px-4 py-3 flex items-center justify-between">
-                  <span className="text-[0.92rem] font-semibold text-ink-mid">Theme</span>
+                  <span className="text-[0.88rem] font-semibold text-ink-mid">Theme</span>
                   <ThemeToggle />
                 </div>
               </div>
@@ -360,7 +360,7 @@ const Navbar = memo(() => {
               {/* Logout */}
               <div className="px-3 pb-6 pt-2 border-t border-line">
                 <motion.button
-                  className="w-full px-4 py-3 rounded-xl text-[0.92rem] font-semibold flex items-center gap-3 text-danger-text hover:bg-danger-soft hover:text-danger cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 rounded-xl text-[0.88rem] font-semibold flex items-center gap-3 text-danger-text hover:bg-danger-soft hover:text-danger cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={handleLogout}
                   disabled={isLoading}
                   initial={{ opacity: 0, y: 10 }}
@@ -368,7 +368,7 @@ const Navbar = memo(() => {
                   transition={{ duration: 0.3, delay: 0.25 }}
                   id="nav-mobile-logout"
                 >
-                  {isLoading ? <Loader2 size={18} className="animate-spin" /> : <LogOut size={18} />}
+                  {isLoading ? <Loader2 size={17} className="animate-spin" /> : <LogOut size={17} />}
                   {isLoading ? 'Signing out...' : 'Sign Out'}
                 </motion.button>
               </div>
@@ -378,7 +378,7 @@ const Navbar = memo(() => {
       </AnimatePresence>
 
       {/* Spacer to push content below the fixed navbar */}
-      <div className="h-16 sm:h-[68px]" />
+      <div className="h-14 sm:h-[64px]" />
     </>
   )
 })

@@ -58,7 +58,7 @@ const EditHabitForm = ({ habit, onClose }: FormProps) => {
       <button
         key={emoji}
         type="button"
-        className={`w-10 h-10 rounded-xl text-lg flex items-center justify-center cursor-pointer transition-all duration-200 ${
+        className={`w-9 h-9 rounded-xl text-base flex items-center justify-center cursor-pointer transition-all duration-200 ${
           icon === emoji
             ? 'bg-brand/15 ring-2 ring-brand scale-110'
             : 'bg-well hover:bg-line'
@@ -88,26 +88,26 @@ const EditHabitForm = ({ habit, onClose }: FormProps) => {
           {/* AUDIT FIX [5.3]: Accessible label for modal close button */}
           <button
             type="button"
-            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-well flex items-center justify-center text-ink-mute hover:bg-line hover:text-ink transition-colors cursor-pointer"
+            className="absolute top-4 right-4 w-7 h-7 rounded-full bg-well flex items-center justify-center text-ink-mute hover:bg-line hover:text-ink transition-colors cursor-pointer"
             onClick={onClose}
             aria-label="Close dialog"
           >
-            <X size={16} />
+            <X size={15} />
           </button>
 
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 rounded-xl bg-brand/10 flex items-center justify-center text-2xl">
+            <div className="w-11 h-11 rounded-xl bg-brand/10 flex items-center justify-center text-xl">
               {icon}
             </div>
             <div>
-              <h3 className="text-lg font-bold text-ink">Edit Habit</h3>
-              <p className="text-[0.78rem] text-ink-mute mt-0.5">
+              <h3 className="text-[1.1rem] font-bold text-ink">Edit Habit</h3>
+              <p className="text-[0.75rem] text-ink-mute mt-0.5">
                 Update your habit details
               </p>
             </div>
           </div>
 
-          <label className="text-[0.82rem] font-medium text-ink-mid mb-1.5 block">
+          <label className="text-[0.78rem] font-medium text-ink-mid mb-1.5 block">
             Habit Name
           </label>
           <input
@@ -115,12 +115,12 @@ const EditHabitForm = ({ habit, onClose }: FormProps) => {
             value={name}
             onChange={handleNameChange}
             placeholder="e.g. Morning Yoga"
-            className="w-full h-12 px-4 rounded-xl border border-line bg-well text-ink text-[0.92rem] font-medium outline-none transition-all duration-200 focus:border-brand-ring focus:ring-2 focus:ring-brand-ring/20 placeholder:text-ink-mute"
+            className="w-full h-11 px-4 rounded-xl border border-line bg-well text-ink text-[0.88rem] font-medium outline-none transition-all duration-200 focus:border-brand-ring focus:ring-2 focus:ring-brand-ring/20 placeholder:text-ink-mute"
             autoFocus
             onKeyDown={handleKeyDown}
           />
 
-          <label className="text-[0.82rem] font-medium text-ink-mid mt-4 mb-2 block">
+          <label className="text-[0.78rem] font-medium text-ink-mid mt-4 mb-2 block">
             Choose an Icon
           </label>
           <div className="flex flex-wrap gap-2">
@@ -129,20 +129,20 @@ const EditHabitForm = ({ habit, onClose }: FormProps) => {
 
           <div className="mt-4">
             <div className="flex items-center justify-between mb-2">
-              <label className="text-[0.82rem] font-medium text-ink-mid flex items-center gap-1.5">
-                <Clock size={14} className="text-brand" />
+              <label className="text-[0.78rem] font-medium text-ink-mid flex items-center gap-1.5">
+                <Clock size={13} className="text-brand" />
                 Schedule Reminder
               </label>
               <button
                 type="button"
-                className={`relative w-11 h-6 rounded-full transition-colors duration-300 cursor-pointer ${
+                className={`relative w-10 h-5.5 rounded-full transition-colors duration-300 cursor-pointer ${
                   scheduleEnabled ? 'bg-brand' : 'bg-line'
                 }`}
                 onClick={toggleSchedule}
               >
                 <span
-                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-surface rounded-full shadow-md transition-transform duration-300 ${
-                    scheduleEnabled ? 'translate-x-5' : 'translate-x-0'
+                  className={`absolute top-0.5 left-0.5 w-4.5 h-4.5 bg-surface rounded-full shadow-md transition-transform duration-300 ${
+                    scheduleEnabled ? 'translate-x-4.5' : 'translate-x-0'
                   }`}
                 />
               </button>
@@ -164,18 +164,18 @@ const EditHabitForm = ({ habit, onClose }: FormProps) => {
 
           <div className="flex gap-3 mt-6">
             <button
-              className="flex-1 h-12 rounded-xl border border-line text-ink-mid text-[0.92rem] font-semibold cursor-pointer hover:bg-well transition-colors duration-200"
+              className="flex-1 h-11 rounded-xl border border-line text-ink-mid text-[0.88rem] font-semibold cursor-pointer hover:bg-well transition-colors duration-200"
               onClick={onClose}
             >
               Cancel
             </button>
             <motion.button
-              className="flex-1 h-12 bg-gradient-to-r from-sf-teal to-sf-teal-light text-on-brand rounded-xl text-[0.92rem] font-semibold flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(44,181,160,0.35)] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex-1 h-11 bg-gradient-to-r from-sf-teal to-sf-teal-light text-on-brand rounded-xl text-[0.88rem] font-semibold flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(44,181,160,0.35)] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed"
               onClick={handleUpdate}
               disabled={!name.trim()}
               whileTap={{ scale: 0.97 }}
             >
-              <Check size={18} strokeWidth={2.5} />
+              <Check size={17} strokeWidth={2.5} />
               Save Changes
             </motion.button>
           </div>

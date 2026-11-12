@@ -1,14 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
-import WelcomePage from './pages/WelcomePage'
-import SignUpPage from './pages/SignUpPage'
-import SignInPage from './pages/SignInPage'
-import HomePage from './pages/HomePage'
-import StreakPage from './pages/StreakPage'
-import DashboardPage from './pages/DashboardPage'
-import ProfilePage from './pages/ProfilePage'
-import NotFoundPage from './pages/NotFoundPage'
-import PrivacyPage from './pages/PrivacyPage'
-import TermsPage from './pages/TermsPage'
+import { lazy, Suspense } from 'react'
 import { CookieConsent } from './components/common/CookieConsent'
 import PublicRoute from './routes/PublicRoutes'
 import ProtectedRoute from './routes/ProtectedRoutes'
@@ -16,6 +7,17 @@ import { AnimatePresence } from 'framer-motion'
 import Loader from './components/common/Loader'
 import { Toaster } from 'react-hot-toast'
 import { useAppHydration } from './hooks/useAppHydration'
+
+const WelcomePage = lazy(() => import('./pages/WelcomePage'))
+const SignUpPage = lazy(() => import('./pages/SignUpPage'))
+const SignInPage = lazy(() => import('./pages/SignInPage'))
+const HomePage = lazy(() => import('./pages/HomePage'))
+const StreakPage = lazy(() => import('./pages/StreakPage'))
+const DashboardPage = lazy(() => import('./pages/DashboardPage'))
+const ProfilePage = lazy(() => import('./pages/ProfilePage'))
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage'))
+const TermsPage = lazy(() => import('./pages/TermsPage'))
 
 function App() {
   const appReady = useAppHydration()
@@ -29,7 +31,7 @@ function App() {
             background: 'var(--sf-surface)',
             color: 'var(--sf-text)',
             borderRadius: '12px',
-            fontSize: '0.92rem',
+            fontSize: '0.85rem',
             fontWeight: 500,
             border: '1px solid var(--sf-line)',
             boxShadow: '0 8px 30px rgba(0,0,0,0.15)'
@@ -55,27 +57,29 @@ function App() {
 
       {appReady && (
         <>
-          <Routes>
-            <Route element={<PublicRoute/>}>
-              <Route path="/" element={<WelcomePage />} />
-              <Route path="/signup" element={<SignUpPage />} />
-              <Route path="/signin" element={<SignInPage />} />
-            </Route>
+          <Suspense fallback={<Loader message="Loading page..." />}>
+            <Routes>
+              <Route element={<PublicRoute/>}>
+                <Route path="/" element={<WelcomePage />} />
+                <Route path="/signup" element={<SignUpPage />} />
+                <Route path="/signin" element={<SignInPage />} />
+              </Route>
 
-            {/* AUDIT FIX [9.2]: Legal Routes */}
-            <Route path="/privacy" element={<PrivacyPage />} />
-            <Route path="/terms" element={<TermsPage />} />
+              {/* AUDIT FIX [9.2]: Legal Routes */}
+              <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/terms" element={<TermsPage />} />
 
-            <Route element={<ProtectedRoute/>}>
-              <Route path="/home" element={<HomePage />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/streak" element={<StreakPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-            </Route>
+              <Route element={<ProtectedRoute/>}>
+                <Route path="/home" element={<HomePage />} />
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/streak" element={<StreakPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+              </Route>
 
-            {/* AUDIT FIX [10.1]: Dedicated 404 Route */}
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
+              {/* AUDIT FIX [10.1]: Dedicated 404 Route */}
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </Suspense>
 
           {/* AUDIT FIX [9.1]: Cookie Consent Banner */}
           <CookieConsent />

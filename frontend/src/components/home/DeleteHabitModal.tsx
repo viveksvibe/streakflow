@@ -38,40 +38,40 @@ export const DeleteHabitModal = memo(({ habit, onClose, onConfirmStart }: Props)
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             >
               <motion.div
-                className="w-16 h-16 mx-auto rounded-full bg-danger-soft flex items-center justify-center mb-5"
+                className="w-14 h-14 mx-auto rounded-full bg-danger-soft flex items-center justify-center mb-5"
                 initial={{ scale: 0.5 }} animate={{ scale: 1 }}
                 transition={{ type: 'spring', stiffness: 300, delay: 0.1 }}
               >
-                <AlertTriangle size={28} className="text-danger-text" />
+                <AlertTriangle size={26} className="text-danger-text" />
               </motion.div>
 
-              <h3 className="text-lg font-bold text-ink mb-2">Delete Habit?</h3>
-              <p className="text-[0.85rem] text-ink-mute leading-relaxed mb-1">
+              <h3 className="text-[1.1rem] font-bold text-ink mb-2">Delete Habit?</h3>
+              <p className="text-[0.8rem] text-ink-mute leading-relaxed mb-1">
                 Are you sure you want to delete
               </p>
-              <p className="text-[0.92rem] font-semibold text-ink mb-1">
+              <p className="text-[0.88rem] font-semibold text-ink mb-1">
                 {habit.icon} {habit.name}
               </p>
               {habit.bestStreak > 0 && (
-                <p className="text-[0.78rem] text-danger-text font-medium flex items-center justify-center gap-1 mt-2">
-                  <Flame size={13} />
+                <p className="text-[0.75rem] text-danger-text font-medium flex items-center justify-center gap-1 mt-2">
+                  <Flame size={12} />
                   You'll lose your {habit.bestStreak}-day streak record
                 </p>
               )}
 
               <div className="flex gap-3 mt-6">
                 <button
-                  className="flex-1 h-12 rounded-xl border border-line text-ink-mid text-[0.92rem] font-semibold cursor-pointer hover:bg-well transition-colors duration-200"
+                  className="flex-1 h-11 rounded-xl border border-line text-ink-mid text-[0.88rem] font-semibold cursor-pointer hover:bg-well transition-colors duration-200"
                   onClick={onClose}
                 >
                   Keep It
                 </button>
                 <motion.button
-                  className="flex-1 h-12 bg-danger text-on-brand rounded-xl text-[0.92rem] font-semibold flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(220,38,38,0.35)] active:translate-y-0"
+                  className="flex-1 h-11 bg-danger text-on-brand rounded-xl text-[0.88rem] font-semibold flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(220,38,38,0.35)] active:translate-y-0"
                   onClick={handleDelete}
                   whileTap={{ scale: 0.97 }}
                 >
-                  <Trash2 size={16} strokeWidth={2.5} />
+                  <Trash2 size={15} strokeWidth={2.5} />
                   Delete
                 </motion.button>
               </div>

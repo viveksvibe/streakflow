@@ -83,7 +83,7 @@ app.get("/health", async (req, res) => {
       },
       requestId: req.id,
     });
-  } catch (error) {
+  } catch {
     res.status(503).json({
       success: false,
       data: {

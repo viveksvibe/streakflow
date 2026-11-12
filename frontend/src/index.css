@@ -172,13 +172,13 @@ html.theme-transitioning body path {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 52px;
-  padding: 0 28px;
-  border-radius: 14px;
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 12px;
   background: var(--color-ember);
   color: var(--sf-ember-cta);
   font-family: var(--font-sans);
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 8px rgba(228, 87, 46, 0.25);
@@ -240,8 +240,8 @@ html.theme-transitioning body path {
 input[type="checkbox"].custom-check {
   appearance: none;
   -webkit-appearance: none;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border: 1.5px solid var(--sf-check-border);
   border-radius: 6px;
   background: var(--sf-check-bg);
@@ -264,7 +264,7 @@ input[type="checkbox"].custom-check:checked::after {
   left: 50%;
   transform: translate(-50%, -50%);
   color: var(--sf-invert-text);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
 }
 
