@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import request from 'supertest';
 import app from '../../app.js';
-import { prisma, cleanupTestData, setHabitProgress } from '../fixtures/test-data.js';
+import { prisma, cleanupTestData, setHabitProgress } from '../fixtures/test-data.ts';
 
 const uniqueEmail = (prefix: string) =>
   `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@example.com`;

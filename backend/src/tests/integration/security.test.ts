@@ -1,7 +1,7 @@
 import { describe, it, expect, afterAll } from 'vitest';
 import request from 'supertest';
 import app from '../../app.js';
-import { prisma } from '../fixtures/test-data.js';
+import { prisma } from '../fixtures/test-data.ts';
 
 describe('Security Integration Tests', () => {
   describe('Security headers (helmet)', () => {
