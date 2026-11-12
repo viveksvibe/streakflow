@@ -1,0 +1,18 @@
+{
+  "name": "streakflow",
+  "version": "1.0.0",
+  "description": "StreakFlow - Production-ready full-stack habit tracking application",
+  "private": true,
+  "scripts": {
+    "backend:typecheck": "cd backend && npx tsc --noEmit",
+    "backend:lint": "cd backend && npm run lint",
+    "backend:test": "cd backend && npm test",
+    "frontend:typecheck": "cd frontend && npx tsc --noEmit",
+    "frontend:lint": "cd frontend && npm run lint",
+    "frontend:dev": "cd frontend && npm run dev",
+    "frontend:build": "cd frontend && npm run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
