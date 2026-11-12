@@ -1,0 +1,180 @@
+# =============================================================================
+# Deploy to EC2 (Backend only)
+# =============================================================================
+#
+# Required GitHub Secrets (Settings -> Secrets and variables -> Actions)
+# -----------------------------------------------------------------------------
+# DOCKERHUB_USERNAME   Docker Hub account name (used to tag image)
+# DOCKERHUB_TOKEN      Docker Hub access token (NOT account password)
+# EC2_SSH_PRIVATE_KEY  SSH private key for the EC2 Ubuntu user (ed25519 or rsa)
+# EC2_HOST             Public IP / hostname of the EC2 instance
+# EC2_SSH_PORT         SSH port (e.g. 22)
+# EC2_USERNAME         SSH user on EC2 (e.g. ubuntu)
+# DATABASE_URL         PostgreSQL connection string (including credentials)
+# JWT_SECRET           Secret used for JWT access tokens
+# JWT_REFRESH_SECRET   Secret used for JWT refresh tokens
+# GOOGLE_CLIENT_ID     Google OAuth client ID
+# GOOGLE_CLIENT_SECRET Google OAuth client secret
+# FRONTEND_URL         Origin of the Cloudflare Pages frontend
+# PORT                 Port the backend listens on (e.g. 3000)
+# NODE_ENV             Environment (production)
+#
+# No VITE_* secrets are needed here — the frontend is built & deployed
+# independently on Cloudflare Pages.
+# =============================================================================
+
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [main]
+
+env:
+  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/streakflow-backend
+
+jobs:
+  test:
+    name: Lint + Typecheck (backend)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+  build-and-push:
+    name: Build & Push Docker image
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & Push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy to EC2 via SSH
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      EC2_HOST: ${{ secrets.EC2_HOST }}
+      EC2_USER: ${{ secrets.EC2_USERNAME }}
+      EC2_PORT: ${{ secrets.EC2_SSH_PORT }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      IMAGE_NAME: ${{ env.IMAGE_NAME }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      JWT_REFRESH_SECRET: ${{ secrets.JWT_REFRESH_SECRET }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+      PORT: ${{ secrets.PORT }}
+      NODE_ENV: ${{ secrets.NODE_ENV }}
+    steps:
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p ${{ secrets.EC2_SSH_PORT }} -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to EC2
+        run: |
+          ssh -p "$EC2_PORT" -o StrictHostKeyChecking=no "$EC2_USER@$EC2_HOST" \
+            "DOCKERHUB_USERNAME='$DOCKERHUB_USERNAME' \
+             DOCKERHUB_TOKEN='$DOCKERHUB_TOKEN' \
+             IMAGE_NAME='$IMAGE_NAME' \
+             DATABASE_URL='$DATABASE_URL' \
+             JWT_SECRET='$JWT_SECRET' \
+             JWT_REFRESH_SECRET='$JWT_REFRESH_SECRET' \
+             GOOGLE_CLIENT_ID='$GOOGLE_CLIENT_ID' \
+             GOOGLE_CLIENT_SECRET='$GOOGLE_CLIENT_SECRET' \
+             FRONTEND_URL='$FRONTEND_URL' \
+             PORT='$PORT' \
+             NODE_ENV='$NODE_ENV' \
+             bash -s" << 'EOF'
+          set -e
+
+          # Log in to Docker Hub
+          echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+
+          # Pull the newly pushed image
+          docker pull "$IMAGE_NAME:latest"
+
+          # Write docker-compose.yml (unquoted heredoc so ${VAR} is expanded
+          # from the shell environment exported above)
+          cat > docker-compose.yml << COMPOSE_EOF
+          version: '3.8'
+          services:
+            backend:
+              image: ${IMAGE_NAME}:latest
+              container_name: streakflow-backend
+              restart: unless-stopped
+              environment:
+                - DATABASE_URL=${DATABASE_URL}
+                - JWT_SECRET=${JWT_SECRET}
+                - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+                - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+                - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+                - FRONTEND_URL=${FRONTEND_URL}
+                - PORT=${PORT}
+                - NODE_ENV=${NODE_ENV}
+              ports:
+                - "${PORT}:${PORT}"
+              networks:
+                - app-network
+
+          networks:
+            app-network:
+              driver: bridge
+          COMPOSE_EOF
+
+          # Deploy (interactive=false so Compose does not consume stdin)
+          docker compose up -d --remove-orphans --interactive=false
+
+          # Prune old images
+          docker image prune -f
+
+          echo "Deployment complete"
+          EOF
+
+      - name: Verify container running
+        run: |
+          ssh -p "${{ secrets.EC2_SSH_PORT }}" -o StrictHostKeyChecking=no "${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}" \
+            "docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
