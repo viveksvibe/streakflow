@@ -133,6 +133,7 @@ jobs:
         run: |
           set -e
           fail() { echo "::error::$1"; exit 1; }
+          mkdir -p ~/.ssh
 
           # --- structural validation (prints shapes, never secret values) ---
           [ -n "$EC2_HOST" ] || fail "EC2_HOST secret is not set"
