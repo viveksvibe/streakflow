@@ -33,8 +33,10 @@ on:
   push:
     branches: [main]
 
-env:
-  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/streakflow-backend
+# NOTE: Docker Hub secrets live in the "production" environment, not as
+# repository secrets. Environment secrets are only resolvable inside jobs
+# that declare `environment: production`, so IMAGE_NAME is computed at job
+# level in build-and-push (workflow-level env would resolve it to "/...").
 
 jobs:
   test:
@@ -67,6 +69,9 @@ jobs:
     name: Build & Push Docker image
     needs: test
     runs-on: ubuntu-latest
+    environment: production
+    env:
+      IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/streakflow-backend
     steps:
       - name: Checkout
         uses: actions/checkout@v4
