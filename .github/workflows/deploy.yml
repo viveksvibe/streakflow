@@ -131,10 +131,26 @@ jobs:
     steps:
       - name: Configure SSH
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          set -e
+          fail() { echo "::error::$1"; exit 1; }
+
+          # --- structural validation (prints shapes, never secret values) ---
+          [ -n "$EC2_HOST" ] || fail "EC2_HOST secret is not set"
+          HOST_WORDS=$(echo "$EC2_HOST" | wc -w)
+          HOST_LINES=$(echo "$EC2_HOST" | wc -l)
+          if [ "$HOST_WORDS" -ne 1 ] || [ "$HOST_LINES" -ne 1 ]; then
+            fail "EC2_HOST must be exactly one hostname or IP with no spaces/newlines (got $HOST_WORDS words on $HOST_LINES lines)"
+          fi
+
+          # Write the private key robustly: strip CR chars (Windows copy/paste)
+          # and guarantee a trailing newline, which OpenSSH requires.
+          printf '%s\n' "$EC2_SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -p ${{ secrets.EC2_SSH_PORT }} -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+          grep -q -- 'BEGIN .* PRIVATE KEY' ~/.ssh/id_ed25519 || \
+            fail "EC2_SSH_PRIVATE_KEY does not look like a PEM private key (missing BEGIN line)"
+          EC2_PORT="${EC2_PORT:-22}"
+
+          ssh-keyscan -p "$EC2_PORT" -H "$EC2_HOST" >> ~/.ssh/known_hosts
 
       - name: Deploy to EC2
         run: |
