@@ -101,7 +101,7 @@ jobs:
       EC2_PORT: ${{ secrets.EC2_SSH_PORT }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      IMAGE_NAME: ${{ env.IMAGE_NAME }}
+      IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/streakflow-backend
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       JWT_REFRESH_SECRET: ${{ secrets.JWT_REFRESH_SECRET }}
