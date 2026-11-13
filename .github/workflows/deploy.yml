@@ -136,13 +136,9 @@ jobs:
           fail() { echo "::error::$1"; exit 1; }
           mkdir -p ~/.ssh
 
-          # --- structural validation (prints shapes, never secret values) ---
-          [ -n "$EC2_HOST" ] || fail "EC2_HOST secret is not set"
-          HOST_WORDS=$(echo "$EC2_HOST" | wc -w)
-          HOST_LINES=$(echo "$EC2_HOST" | wc -l)
-          if [ "$HOST_WORDS" -ne 1 ] || [ "$HOST_LINES" -ne 1 ]; then
-            fail "EC2_HOST must be exactly one hostname or IP with no spaces/newlines (got $HOST_WORDS words on $HOST_LINES lines)"
-          fi
+          # --- strip any accidental whitespace/newlines from the host value ---
+          EC2_HOST_CLEAN=$(printf '%s' "$EC2_HOST" | tr -d '[:space:]')
+          [ -n "$EC2_HOST_CLEAN" ] || fail "EC2_HOST secret is empty"
 
           # Write the private key robustly: strip CR chars (Windows copy/paste)
           # and guarantee a trailing newline, which OpenSSH requires.
@@ -150,13 +146,37 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           grep -q -- 'BEGIN .* PRIVATE KEY' ~/.ssh/id_ed25519 || \
             fail "EC2_SSH_PRIVATE_KEY does not look like a PEM private key (missing BEGIN line)"
+
           EC2_PORT="${EC2_PORT:-22}"
 
-          ssh-keyscan -p "$EC2_PORT" -H "$EC2_HOST" >> ~/.ssh/known_hosts
+          # Populate known_hosts via ssh-keyscan.
+          # If DNS resolution fails here it will also fail during the actual SSH
+          # deploy — surface a clear diagnostic instead of a cryptic keyscan error.
+          if ! ssh-keyscan -p "$EC2_PORT" -T 10 -H "$EC2_HOST_CLEAN" >> ~/.ssh/known_hosts 2>/tmp/keyscan.err; then
+            KEYSCAN_ERR=$(cat /tmp/keyscan.err)
+            if echo "$KEYSCAN_ERR" | grep -q "Name or service not known"; then
+              fail "Cannot resolve EC2_HOST — make sure the secret is a public IP or resolvable hostname. If your EC2 instance uses a dynamic public IP, assign an Elastic IP and update the secret."
+            fi
+            fail "ssh-keyscan failed: $KEYSCAN_ERR"
+          fi
+
+          # Write a typed SSH config so every later step uses the same settings
+          cat > ~/.ssh/config <<EOF
+Host ec2-target
+  HostName $EC2_HOST_CLEAN
+  User $EC2_USER
+  Port $EC2_PORT
+  IdentityFile ~/.ssh/id_ed25519
+  StrictHostKeyChecking accept-new
+  UserKnownHostsFile ~/.ssh/known_hosts
+  ServerAliveInterval 30
+  ServerAliveCountMax 3
+EOF
+          chmod 600 ~/.ssh/config
 
       - name: Deploy to EC2
         run: |
-          ssh -p "$EC2_PORT" -o StrictHostKeyChecking=no "$EC2_USER@$EC2_HOST" \
+          ssh ec2-target \
             "DOCKERHUB_USERNAME='$DOCKERHUB_USERNAME' \
              DOCKERHUB_TOKEN='$DOCKERHUB_TOKEN' \
              IMAGE_NAME='$IMAGE_NAME' \
@@ -216,5 +236,4 @@ jobs:
 
       - name: Verify container running
         run: |
-          ssh -p "${{ secrets.EC2_SSH_PORT }}" -o StrictHostKeyChecking=no "${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}" \
-            "docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
+          ssh ec2-target "docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
